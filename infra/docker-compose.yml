@@ -20,7 +20,7 @@ services:
       context: ./../apps/frontend
       dockerfile: ../../infra/docker/frontend/Dockerfile
     volumes:
-      - atom_challenge_frontend_volume:/app
+      - ../apps/frontend:/app
     ports:
       - "4201:4200"
     networks:
@@ -35,7 +35,7 @@ services:
       context: ../apps/backend
       dockerfile: ../../infra/docker/backend/Dockerfile
     volumes:
-      - atom_challenge_backend_volume:/app
+      - ../apps/backend:/app
       - ../infra/firebase/service-account.json:/app/service-account.json
       - ../apps/backend/.env:/app/.env
     ports:

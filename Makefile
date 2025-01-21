@@ -12,14 +12,6 @@ check-network:
 	fi
 
 create-volumes:
-	@if ! docker volume inspect atom_challenge_frontend_volume >/dev/null 2>&1; then \
-		docker volume create atom_challenge_frontend_volume; \
-		echo "Creado volumen atom_challenge_frontend_volume"; \
-	fi
-	@if ! docker volume inspect atom_challenge_backend_volume >/dev/null 2>&1; then \
-		docker volume create atom_challenge_backend_volume; \
-		echo "Creado volumen atom_challenge_backend_volume"; \
-	fi
 	@if ! docker volume inspect atom_challenge_firebase_volume >/dev/null 2>&1; then \
 		docker volume create atom_challenge_firebase_volume; \
 		echo "Creado volumen atom_challenge_firebase_volume"; \
@@ -34,5 +26,5 @@ down:
 	docker-compose -f infra/docker-compose.yml down
 
 clean: down
-	docker volume rm atom_challenge_frontend_volume atom_challenge_backend_volume atom_challenge_firebase_volume || true
+	docker volume rm atom_challenge_firebase_volume || true
 	docker network rm $(NETWORK) || true
