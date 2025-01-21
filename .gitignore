@@ -1,0 +1,7 @@
+/infra/firebase/functions/node_modules
+/infra/firebase/service-account.json
+/infra/firebase/*debug*
+*node_modules*
+*.env
+*.vscode
+*dist

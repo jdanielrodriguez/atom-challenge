@@ -1,0 +1,80 @@
+networks:
+  atom_challenge_network:
+    external: true
+
+volumes:
+  atom_challenge_frontend_volume:
+    name: atom_challenge_frontend_volume
+    external: true
+  atom_challenge_backend_volume:
+    name: atom_challenge_backend_volume
+    external: true
+  atom_challenge_firebase_volume:
+    name: atom_challenge_firebase_volume
+    external: true
+
+services:
+  atom_challenge_frontend:
+    container_name: atom_challenge_frontend
+    build:
+      context: ./../apps/frontend
+      dockerfile: ../../infra/docker/frontend/Dockerfile
+    volumes:
+      - atom_challenge_frontend_volume:/app
+    ports:
+      - "4201:4200"
+    networks:
+      atom_challenge_network:
+        ipv4_address: 192.168.100.3
+    environment:
+      - NODE_ENV=development
+
+  atom_challenge_backend:
+    container_name: atom_challenge_backend
+    build:
+      context: ../apps/backend
+      dockerfile: ../../infra/docker/backend/Dockerfile
+    volumes:
+      - atom_challenge_backend_volume:/app
+      - ../infra/firebase/service-account.json:/app/service-account.json
+      - ../apps/backend/.env:/app/.env
+    ports:
+      - "3000:3000"
+    networks:
+      atom_challenge_network:
+        ipv4_address: 192.168.100.4
+    environment:
+      - NODE_ENV=development
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/service-account.json
+    command: npm run dev
+
+
+  atom_challenge_firebase:
+    container_name: atom_challenge_firebase
+    build:
+      context: ../infra
+      dockerfile: docker/firebase/Dockerfile
+    volumes:
+      - atom_challenge_firebase_volume:/firebase/data
+      - ../infra/firebase:/firebase/config
+      - ../infra/firebase/service-account.json:/root/.config/firebase/service-account.json
+    ports:
+      - "4400:4400"
+      - "8080:8080"
+      - "5001:5001"
+      - "9000:9000"
+      - "4000:4000"
+    networks:
+      atom_challenge_network:
+        ipv4_address: 192.168.100.5
+    working_dir: /firebase/config
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/root/.config/firebase/service-account.json
+    entrypoint:
+      [
+        "firebase",
+        "emulators:start",
+        "--only",
+        "firestore,functions,auth,database",
+        "--project=atom-challenge-599be"
+      ]
