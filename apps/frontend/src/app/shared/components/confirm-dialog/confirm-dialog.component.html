@@ -1,0 +1,19 @@
+<div class="dialog-wrapper">
+  <button mat-icon-button class="close-button" (click)="onCancel()">
+    <mat-icon>close</mat-icon>
+  </button>
+  <div class="dialog-header">
+    <h2>{{ data.title }}</h2>
+  </div>
+  <div mat-dialog-content class="dialog-content">
+    <p>{{ data.message }}</p>
+  </div>
+  <div mat-dialog-actions class="dialog-actions">
+    <button mat-raised-button color="warn" (click)="onCancel()">
+      {{ data.cancelText || 'Cancelar' }}
+    </button>
+    <button mat-raised-button color="primary" (click)="onConfirm()">
+      {{ data.confirmText || 'Aceptar' }}
+    </button>
+  </div>
+</div>

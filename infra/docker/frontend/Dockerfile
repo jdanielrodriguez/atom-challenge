@@ -4,9 +4,9 @@ WORKDIR /app
 
 RUN npm install -g @angular/cli
 
-COPY package.json package-lock.json ./
+COPY package.json yarn.lock ./
 
-RUN npm install --legacy-peer-deps
+RUN yarn install
 
 COPY . .
 

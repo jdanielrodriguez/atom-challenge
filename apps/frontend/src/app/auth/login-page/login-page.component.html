@@ -1,20 +1,25 @@
-<header class="mat-elevation-z1">
-  <img alt="Logo de ATOM Chat" ngSrc="assets/images/logo-atom-chat.png" width="192.5" height="55" />
-  <h1 class="welcome-txt">Reto Técnico</h1>
-</header>
-<div class="welcome-container">
-  <p>
-    <b>¡Hola!</b>
-    <br><br>
-    Es un placer darte la bienvenida a esta fase crucial de nuestro proceso de selección. Esperamos que te encuentres emocionado por enfrentar este desafío técnico y demostrar todo tu talento y habilidades.
-    <br><br>
-    Queremos recordarte que las indicaciones detalladas para esta prueba se encuentran en el documento del reto técnico que te hemos proporcionado. Te pedimos que sigas cada instrucción cuidadosamente para garantizar una evaluación justa y precisa de tu trabajo.
-    <br><br>
-    Estamos seguros de que tienes el conocimiento, la experiencia y la determinación necesarios para superar este desafío con éxito. Confiamos en tus habilidades y estamos ansiosos por ver todo lo que puedes lograr.
-    <br><br>
-    Te deseamos mucho éxito en esta prueba técnica. ¡Estamos seguros de que dejarás una impresión duradera y nos sorprenderás con tus capacidades!
-  </p>
-  <br>
-  <p class="good-luck-txt">¡Adelante y buena suerte!</p>
-</div>
+<div class="login-wrapper">
+  <div class="login-card">
+    <h1 class="login-title">Bienvenido</h1>
+    <form (ngSubmit)="onSubmit()" [formGroup]="loginForm" class="login-form">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Email</mat-label>
+        <input matInput formControlName="email" type="email" (blur)="onEmailBlur()" required />
+        <mat-error *ngIf="loginForm.get('email')?.invalid">
+          Por favor introduce un email válido.
+        </mat-error>
+      </mat-form-field>
 
+      <mat-form-field appearance="outline" class="full-width" *ngIf="loginForm.get('password')?.enabled">
+        <mat-label>Password</mat-label>
+        <input matInput formControlName="password" type="password" required />
+        <mat-error *ngIf="loginForm.get('password')?.invalid">Introduce tu contraseña</mat-error>
+      </mat-form-field>
+
+      <button mat-raised-button color="primary" type="submit" [disabled]="loginForm.invalid || loading"
+        class="full-width">
+        {{ loading ? 'Cargando...' : 'Login' }}
+      </button>
+    </form>
+  </div>
+</div>
