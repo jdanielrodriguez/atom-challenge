@@ -1,6 +1,6 @@
 # **Atom Challenge - Fullstack Application**
 
-Este proyecto es una aplicación de lista de tareas desarrollada con **Angular** para el frontend, **Express** en el backend, y utilizando **Firebase** para la base de datos y autenticación. Incluye contenedores Docker para facilitar el despliegue y la configuración.
+Este proyecto es una aplicación de lista de tareas desarrollada con **Angular** para el frontend, **Express** en el backend, y utilizando **Firebase** para la base de datos y autenticación. Todo está configurado para correr en contenedores Docker y utiliza **Yarn** como gestor de paquetes.
 
 ---
 
@@ -9,13 +9,13 @@ Este proyecto es una aplicación de lista de tareas desarrollada con **Angular**
 1. **Frontend**:
    - Construido con Angular 17.
    - Administración de estado con NgRx.
-   - Material Design con Angular Material.
-   - Comunicación con el backend a través de HTTP.
+   - Interfaz moderna usando Angular Material.
+   - Comunicación con el backend a través de HTTP Interceptors.
 
 2. **Backend**:
    - API REST desarrollada con Express y TypeScript.
    - Integración con Firebase Admin SDK para Firestore y autenticación.
-   - Configuración lista para ser desplegada en Docker.
+   - Middleware de autenticación para proteger las rutas privadas.
 
 3. **Firebase**:
    - Uso del emulador para desarrollo local.
@@ -28,6 +28,7 @@ Este proyecto es una aplicación de lista de tareas desarrollada con **Angular**
 Asegúrate de tener instalado lo siguiente en tu sistema:
 
 - **Node.js** (versión 18).
+- **Yarn** como gestor de paquetes.
 - **Docker** y **Docker Compose**.
 - Una cuenta de Google Cloud configurada para Firebase.
 
@@ -37,8 +38,8 @@ Asegúrate de tener instalado lo siguiente en tu sistema:
 
 1. **Clonar el Repositorio**:
    ```bash
-   git clone <URL-DEL-REPO>
-   cd <DIRECTORIO-DEL-REPO>
+   git clone https://github.com/jdanielrodriguez/atom-challenge
+   cd atom-challenge
    ```
 
 2. **Obtener las Credenciales de Firebase**:
@@ -49,7 +50,7 @@ Asegúrate de tener instalado lo siguiente en tu sistema:
    4. Haz clic en **Generar nueva clave privada**.
    5. Descarga el archivo JSON y guárdalo en `infra/firebase/service-account.json`.
 
-   > **Nota**: No subas este archivo al repositorio. Un ejemplo (`service-account.json.example`) está disponible para que otros sepan cómo configurarlo.
+   > **Nota**: No subas este archivo al repositorio. Usa el ejemplo `service-account.json.example`.
 
 3. **Configurar el Archivo `.env`**:
    Crea un archivo `.env` en `apps/backend/` basado en el ejemplo proporcionado (`.env.example`):
@@ -59,9 +60,19 @@ Asegúrate de tener instalado lo siguiente en tu sistema:
    PORT=3000
    ```
 
-4. **Levantar los Servicios con Docker**:
+4. **Instalar Dependencias**:
 
-   Ejecuta los siguientes comandos desde la raíz del proyecto:
+   En lugar de `npm`, este proyecto utiliza Yarn. Ejecuta los siguientes comandos:
+
+   ```bash
+   yarn install
+   ```
+
+   Repite este comando en las carpetas `apps/frontend` y `apps/backend`.
+
+5. **Levantar los Servicios con Docker**:
+
+   Desde la raíz del proyecto, ejecuta:
    ```bash
    make up
    ```
@@ -100,7 +111,8 @@ root/
 - `make down`: Detiene y elimina los contenedores.
 
 ### **Sin `make`**
-Usa Docker Compose manualmente:
+Si prefieres usar Docker Compose directamente:
+
 ```bash
 docker-compose -f infra/docker-compose.yml up -d
 docker-compose -f infra/docker-compose.yml down
