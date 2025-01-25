@@ -1,7 +1,7 @@
 <div class="task-list-container">
   <!-- Botón de cerrar sesión -->
   <div class="logout-container">
-    <button mat-raised-button color="warn" (click)="logout()">Cerrar sesión</button>
+    <app-logout-button></app-logout-button>
   </div>
 
   <!-- Encabezado -->
@@ -50,7 +50,7 @@
 
     <!-- Encabezado y filas -->
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr mat-row *matRowDef="let row; columns: displayedColumns;" ></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
   </table>
 
   <!-- Botón flotante para agregar tareas -->

@@ -17,7 +17,7 @@
       </mat-error>
     </mat-form-field>
 
-    <mat-slide-toggle *ngIf="isEditMode" formControlName="completed" [disabled]="taskForm.get('completed')?.value">
+    <mat-slide-toggle *ngIf="isEditMode" formControlName="completed" >
       {{ taskForm.get('completed')?.value ? 'Completada' : 'Pendiente'}}
     </mat-slide-toggle>
 
