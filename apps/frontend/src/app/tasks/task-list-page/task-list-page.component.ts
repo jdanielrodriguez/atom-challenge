@@ -53,7 +53,7 @@ export class TaskListPageComponent {
     const dialogRef = this.dialog.open(TaskDetailPageComponent, {
       ...DEFAULT_DIALOG_CONFIG,
       ...{
-        height: '100%',
+        height: '70%',
         data: { mode: 'create' },
       }
     });
@@ -69,7 +69,7 @@ export class TaskListPageComponent {
     const dialogRef = this.dialog.open(TaskDetailPageComponent, {
       ...DEFAULT_DIALOG_CONFIG,
       ...{
-        height: '100%',
+        height: '80%',
         data: { mode: 'edit', task }
       },
     });
