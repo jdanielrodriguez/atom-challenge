@@ -26,9 +26,6 @@ export class TaskService {
     return throwError(() => new Error(errorMessage));
   }
 
-  /**
-   * Transforma las fechas en la respuesta de la API.
-   */
   private transformTaskDates(task: Task): Task {
     if (task.createdAt && typeof task.createdAt === 'object' && '_seconds' in task.createdAt) {
       task.createdAt = new Date(task.createdAt._seconds * 1000);
@@ -47,7 +44,6 @@ export class TaskService {
       return task;
     });
   }
-
 
   getTasks(): Observable<Task[]> {
     return this.http.get<Task[]>(this.apiUrl).pipe(
@@ -85,9 +81,6 @@ export class TaskService {
     );
   }
 
-  /**
-   * Prepara una tarea para enviarla a la API.
-   */
   private formatTaskBeforeSending(task: Task): any {
     const formattedTask = { ...task };
     if (task.createdAt instanceof Date) {
