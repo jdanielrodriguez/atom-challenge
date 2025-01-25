@@ -134,7 +134,7 @@ export class LoginPageComponent {
         },
         error: (err) => {
           console.error('Error en el login:', err);
-          this.dialog.open(ConfirmDialogComponent, {
+          const dialogRef = this.dialog.open(ConfirmDialogComponent, {
             ...DEFAULT_DIALOG_CONFIG,
             ...{
               data: {
@@ -143,6 +143,16 @@ export class LoginPageComponent {
                 confirmText: 'Aceptar',
               }
             },
+          });
+          dialogRef.afterClosed().subscribe((result) => {
+            if (result) {
+              const passwordControl = this.loginForm.get('password');
+              if (passwordControl) {
+                passwordControl.setValue('');
+                passwordControl.markAsPristine();
+                passwordControl.markAsUntouched();
+              }
+            }
           });
         },
       });
