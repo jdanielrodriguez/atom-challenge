@@ -6,3 +6,4 @@
 *.vscode
 /apps/backend/service-account.json
 *dist
+apps/frontend/src/environments/environment.ts
