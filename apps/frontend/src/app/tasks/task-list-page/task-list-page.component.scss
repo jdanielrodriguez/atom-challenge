@@ -1,0 +1,45 @@
+.task-list-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  h1 {
+    text-align: center;
+    color: #3f51b5;
+    margin: 16px 0 24px;
+  }
+
+  table {
+    width: 100%;
+    max-width: 1000px;
+    margin: 24px 0;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .add-task-button {
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    z-index: 1000;
+  }
+
+  .logout-container {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 16px;
+
+    button {
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+  }
+
+  button {
+    text-transform: uppercase;
+    font-weight: bold;
+  }
+}

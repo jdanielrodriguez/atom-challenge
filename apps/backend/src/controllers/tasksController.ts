@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import FirebaseService from '../services/firebaseService';
+import { Task } from '../interfaces/task.interface';
 
 export const getTasks = async (req: Request, res: Response): Promise<void> => {
    try {
@@ -16,7 +17,11 @@ export const getTasks = async (req: Request, res: Response): Promise<void> => {
 export const createTask = async (req: Request, res: Response): Promise<void> => {
    try {
       const db = FirebaseService.getFirestore();
-      const task = req.body;
+      const task: Task = {
+         ...req.body,
+         createdAt: new Date(),
+         completed: false,
+      };
 
       const newTask = await db.collection('tasks').add(task);
 
