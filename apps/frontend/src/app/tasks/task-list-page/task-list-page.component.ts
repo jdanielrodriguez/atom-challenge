@@ -21,7 +21,7 @@ import { ConfirmDialogComponent, DEFAULT_DIALOG_CONFIG } from '../../shared/comp
 })
 export class TaskListPageComponent {
   tasks: Task[] = [];
-  displayedColumns: string[] = ['title', 'description', 'createdAt', 'status', 'delete'];
+  displayedColumns: string[] = ['title', 'description', 'createdAt', 'status', 'options'];
 
   constructor(
     private authService: AuthService,

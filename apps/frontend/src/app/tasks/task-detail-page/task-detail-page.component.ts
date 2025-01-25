@@ -44,12 +44,11 @@ export class TaskDetailPageComponent implements OnInit {
   ngOnInit(): void {
     this.initForm();
 
-    this.route.paramMap.subscribe((params) => {
-      this.taskId = params.get('id');
-      if (this.taskId) {
-        this.loadTask(this.taskId);
-      }
-    });
+    if (this.data?.task) {
+      this.taskId = this.data.task.id || null;
+      this.isEditMode = !!this.taskId;
+      this.taskForm.patchValue(this.data.task);
+    }
   }
 
   private initForm(): void {
@@ -117,7 +116,7 @@ export class TaskDetailPageComponent implements OnInit {
     this.taskService.updateTask(task).subscribe({
       next: () => {
         this.snackBar.open('Tarea actualizada correctamente', 'Cerrar', { duration: 3000 });
-        this.router.navigate(['/tasks']);
+        this.dialogRef.close(task);
       },
       error: () => {
         this.snackBar.open('Error actualizando la tarea', 'Cerrar', { duration: 3000 });
