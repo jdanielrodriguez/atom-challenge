@@ -121,6 +121,9 @@ export class LoginPageComponent {
   onSubmit(): void {
     if (this.loginForm.valid) {
       const { email, password } = this.loginForm.value;
+      if (!password) {
+        return;
+      }
       this.loading = true;
       this.authService.login(email, password).pipe(
         finalize(() => (this.loading = false))

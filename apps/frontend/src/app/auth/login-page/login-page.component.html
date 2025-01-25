@@ -16,7 +16,7 @@
         <mat-error *ngIf="loginForm.get('password')?.invalid">Introduce tu contraseña</mat-error>
       </mat-form-field>
 
-      <button mat-raised-button color="primary" type="submit" [disabled]="loginForm.invalid || loading"
+      <button mat-raised-button color="primary" type="submit" [disabled]="(loginForm.invalid && loginForm.get('password')?.enabled) || loading"
         class="full-width">
         {{ loading ? 'Cargando...' : 'Login' }}
       </button>
