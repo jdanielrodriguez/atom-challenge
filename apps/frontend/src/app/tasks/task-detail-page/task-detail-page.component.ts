@@ -1,7 +1,6 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TaskService } from '../../core/services/task.service';
 import { Task } from '../../interfaces/task.interface';
@@ -9,7 +8,7 @@ import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
 @Component({
   selector: 'app-task-detail-page',
@@ -19,7 +18,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    MatCheckboxModule,
+    MatSlideToggleModule,
     CommonModule,
   ],
   templateUrl: './task-detail-page.component.html',
@@ -34,15 +33,14 @@ export class TaskDetailPageComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private taskService: TaskService,
-    private route: ActivatedRoute,
-    private router: Router,
     private snackBar: MatSnackBar,
     private dialogRef: MatDialogRef<TaskDetailPageComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { task: Task | null }
+    @Inject(MAT_DIALOG_DATA) public data: { task: Task | null, readonly: boolean }
   ) { }
 
   ngOnInit(): void {
-    this.initForm();
+    const isReadonly = this.data?.readonly || false;
+    this.initForm(isReadonly);
 
     if (this.data?.task) {
       this.taskId = this.data.task.id || null;
@@ -51,32 +49,11 @@ export class TaskDetailPageComponent implements OnInit {
     }
   }
 
-  private initForm(): void {
+  private initForm(isReadonly: boolean = false): void {
     this.taskForm = this.fb.group({
       title: ['', [Validators.required, Validators.maxLength(100)]],
       description: ['', [Validators.required, Validators.maxLength(500)]],
-      completed: [false],
-    });
-  }
-
-  private loadTask(taskId: string): void {
-    this.isLoading = true;
-    this.isEditMode = true;
-    this.taskService.getTasks().subscribe({
-      next: (tasks) => {
-        const task = tasks.find((t) => t.id === taskId);
-        if (task) {
-          this.taskForm.patchValue(task);
-        } else {
-          this.snackBar.open('Tarea no encontrada', 'Cerrar', { duration: 3000 });
-          this.router.navigate(['/tasks']);
-        }
-      },
-      error: () => {
-        this.snackBar.open('Error cargando la tarea', 'Cerrar', { duration: 3000 });
-        this.router.navigate(['/tasks']);
-      },
-      complete: () => (this.isLoading = false),
+      completed: [{ value: false, disabled: isReadonly }],
     });
   }
 

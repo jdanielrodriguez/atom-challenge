@@ -54,7 +54,6 @@ export class TaskListPageComponent {
       ...DEFAULT_DIALOG_CONFIG,
       ...{
         height: '70%',
-        data: { mode: 'create' },
       }
     });
 
@@ -70,7 +69,7 @@ export class TaskListPageComponent {
       ...DEFAULT_DIALOG_CONFIG,
       ...{
         height: '80%',
-        data: { mode: 'edit', task }
+        data: { task, readonly: true }
       },
     });
 

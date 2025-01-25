@@ -17,7 +17,9 @@
       </mat-error>
     </mat-form-field>
 
-    <mat-checkbox formControlName="completed">Completada</mat-checkbox>
+    <mat-slide-toggle *ngIf="isEditMode" formControlName="completed" [disabled]="taskForm.get('completed')?.value">
+      {{ taskForm.get('completed')?.value ? 'Completada' : 'Pendiente'}}
+    </mat-slide-toggle>
 
     <div class="actions">
       <button mat-raised-button color="primary" type="submit" [disabled]="taskForm.invalid">
