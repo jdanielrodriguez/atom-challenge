@@ -43,3 +43,25 @@
     font-weight: bold;
   }
 }
+mat-select {
+  width: 100%;
+
+  mat-option {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .mat-option-text {
+    font-weight: bold;
+  }
+
+  .mat-option-status {
+    font-style: italic;
+    font-size: 0.85rem;
+    color: #888;
+  }
+}
+.mat-option-content {
+  font-weight: bold;
+}

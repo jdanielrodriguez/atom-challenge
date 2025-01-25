@@ -1,11 +1,13 @@
 import { Component } from '@angular/core';
+import { MatDividerModule } from '@angular/material/divider';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
+import { MatSelectModule } from '@angular/material/select';
 import { CommonModule } from '@angular/common';
 import { TaskService } from '../../core/services/task.service';
-import { Task } from '../../interfaces/task.interface';
+import { Task, TaskStatus } from '../../interfaces/task.interface';
 import { TaskDetailPageComponent } from '../task-detail-page/task-detail-page.component';
 import { ConfirmDialogComponent, DEFAULT_DIALOG_CONFIG } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { LogoutButtonComponent } from '../../shared/components/logout-button/logout-button.component';
@@ -14,13 +16,14 @@ import { LogoutButtonComponent } from '../../shared/components/logout-button/log
 @Component({
   selector: 'app-task-list-page',
   standalone: true,
-  imports: [MatTableModule, MatButtonModule, MatIconModule, CommonModule, LogoutButtonComponent],
+  imports: [MatTableModule, MatButtonModule, MatIconModule, CommonModule, LogoutButtonComponent, MatDividerModule, MatSelectModule],
   templateUrl: './task-list-page.component.html',
   styleUrls: ['./task-list-page.component.scss'],
 })
 export class TaskListPageComponent {
   tasks: Task[] = [];
-  displayedColumns: string[] = ['title', 'description', 'createdAt', 'status', 'options'];
+  displayedColumns: string[] = ['title', 'createdAt', 'status', 'options'];
+  statuses: string[] = Object.values(TaskStatus);
 
   constructor(
     private taskService: TaskService,
@@ -44,6 +47,38 @@ export class TaskListPageComponent {
       },
       error: (err) => console.error('Error updating task status:', err),
     });
+  }
+
+  onStatusChange(task: Task, newStatus: string): void {
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      ...DEFAULT_DIALOG_CONFIG,
+      ...{
+        data: {
+          title: 'Cambiar Estado',
+          message: `¿Seguro que deseas cambiar el estado de "${task.title}" de "${task.status}" a "${newStatus}"?`,
+          confirmText: 'Confirmar',
+          cancelText: 'Cancelar',
+        },
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed) => {
+      if (confirmed) {
+        task.completed = false;
+        if (newStatus === 'Completado') {
+          task.completed = true;
+        }
+        task.status = Object.values(TaskStatus).includes(newStatus as TaskStatus) ? (newStatus as TaskStatus) : TaskStatus.Creado;
+        this.taskService.updateTask(task).subscribe({
+          next: () => console.log('Estado actualizado'),
+          error: (err) => console.error('Error actualizando el estado', err),
+        });
+      }
+    });
+  }
+
+  getFilteredStatuses(currentStatus: string): string[] {
+    return this.statuses.filter((status) => status !== currentStatus);
   }
 
   addTask(): void {

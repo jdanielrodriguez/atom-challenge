@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import FirebaseService from '../services/firebaseService';
-import { Task } from '../interfaces/task.interface';
+import { Task, TaskStatus } from '../interfaces/task.interface';
 
 export const getTasks = async (req: Request, res: Response): Promise<void> => {
    try {
@@ -24,7 +24,8 @@ export const createTask = async (req: Request, res: Response): Promise<void> => 
          ...req.body,
          createdAt: new Date(),
          completed: false,
-         userId
+         userId,
+         status: TaskStatus.Creado
       };
 
       const newTask = await db.collection('tasks').add(task);
@@ -40,7 +41,12 @@ export const updateTask = async (req: Request, res: Response): Promise<void> => 
       const db = FirebaseService.getFirestore();
       const userId = (req as any).user.id;
       const taskId = req.params.id;
-      const updatedTaskData = req.body;
+      const { id, ...updatedTaskData } = req.body;
+
+      if (!id) {
+         res.status(400).json({ error: 'Task ID is required' });
+         return;
+      }
 
       const taskRef = db.collection('tasks').doc(taskId);
       const taskSnapshot = await taskRef.get();

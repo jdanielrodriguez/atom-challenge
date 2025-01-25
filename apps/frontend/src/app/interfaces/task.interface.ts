@@ -7,4 +7,11 @@ export interface Task {
     _seconds: number;
   } | Date;
   completed: boolean;
+  status: TaskStatus;
+}
+export enum TaskStatus {
+  Creado = 'Creado',
+  EnProceso = 'En proceso',
+  EnPruebas = 'En pruebas',
+  Completado = 'Completado',
 }
