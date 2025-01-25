@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { BehaviorSubject, Observable, throwError } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
+import { catchError, map, tap } from 'rxjs/operators';
 import { Task } from '../../interfaces/task.interface';
 
 @Injectable({ providedIn: 'root' })
@@ -26,15 +26,40 @@ export class TaskService {
     return throwError(() => new Error(errorMessage));
   }
 
+  /**
+   * Transforma las fechas en la respuesta de la API.
+   */
+  private transformTaskDates(task: Task): Task {
+    if (task.createdAt && typeof task.createdAt === 'object' && '_seconds' in task.createdAt) {
+      task.createdAt = new Date(task.createdAt._seconds * 1000);
+    }
+    return task;
+  }
+
+  private transformTasksDates(tasks: Task[]): Task[] {
+    return tasks.map(task => {
+      if (task.createdAt && typeof task.createdAt === 'object' && '_seconds' in task.createdAt) {
+        return {
+          ...task,
+          createdAt: new Date(task.createdAt._seconds * 1000),
+        };
+      }
+      return task;
+    });
+  }
+
+
   getTasks(): Observable<Task[]> {
     return this.http.get<Task[]>(this.apiUrl).pipe(
-      tap((tasks) => this.tasksSubject.next(tasks)),
+      map(tasks => this.transformTasksDates(tasks)),
+      tap(transformedTasks => this.tasksSubject.next(transformedTasks)),
       catchError(this.handleError)
     );
   }
 
   addTask(task: Task): Observable<Task> {
-    return this.http.post<Task>(this.apiUrl, task).pipe(
+    return this.http.post<Task>(this.apiUrl, this.formatTaskBeforeSending(task)).pipe(
+      map(this.transformTaskDates),
       tap((newTask) => {
         const currentTasks = this.tasksSubject.getValue();
         this.tasksSubject.next([...currentTasks, newTask]);
@@ -45,7 +70,8 @@ export class TaskService {
   }
 
   updateTask(task: Task): Observable<Task> {
-    return this.http.put<Task>(`${this.apiUrl}/${task.id}`, task).pipe(
+    return this.http.put<Task>(`${this.apiUrl}/${task.id}`, this.formatTaskBeforeSending(task)).pipe(
+      map(this.transformTaskDates),
       tap((updatedTask) => {
         const currentTasks = this.tasksSubject.getValue();
         const taskIndex = currentTasks.findIndex((t) => t.id === updatedTask.id);
@@ -57,6 +83,20 @@ export class TaskService {
       }),
       catchError(this.handleError)
     );
+  }
+
+  /**
+   * Prepara una tarea para enviarla a la API.
+   */
+  private formatTaskBeforeSending(task: Task): any {
+    const formattedTask = { ...task };
+    if (task.createdAt instanceof Date) {
+      formattedTask.createdAt = {
+        _seconds: Math.floor(task.createdAt.getTime() / 1000),
+        _nanoseconds: (task.createdAt.getTime() % 1000) * 1e6,
+      };
+    }
+    return formattedTask;
   }
 
   deleteTask(taskId: string | number): Observable<void> {

@@ -1,0 +1,24 @@
+<div class="form-container">
+  <h1 *ngIf="taskId">Editar Tarea</h1>
+  <h1 *ngIf="!taskId">Nueva Tarea</h1>
+
+  <form [formGroup]="taskForm" (ngSubmit)="onSubmit()">
+    <mat-form-field class="full-width">
+      <mat-label>Título</mat-label>
+      <input matInput formControlName="title" placeholder="Ingresa el título" required />
+      <mat-error *ngIf="taskForm.get('title')?.hasError('required')">El título es obligatorio</mat-error>
+    </mat-form-field>
+
+    <mat-form-field class="full-width">
+      <mat-label>Descripción</mat-label>
+      <textarea matInput formControlName="description" placeholder="Ingresa una descripción"></textarea>
+    </mat-form-field>
+
+    <div class="actions">
+      <button mat-raised-button color="primary" type="submit" [disabled]="taskForm.invalid">
+        {{ taskId ? 'Guardar Cambios' : 'Crear Tarea' }}
+      </button>
+      <button mat-raised-button color="warn" type="button" (click)="onCancel()">Cancelar</button>
+    </div>
+  </form>
+</div>
