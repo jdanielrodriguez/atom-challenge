@@ -6,7 +6,10 @@ export const getTasks = async (req: Request, res: Response): Promise<void> => {
    try {
       const db = FirebaseService.getFirestore();
       const userId = (req as any).user.id;
-      const userTasksSnapshot = await db.collection('tasks').where('userId', '==', userId).get();
+      const userTasksSnapshot = await db.collection('tasks')
+         .where('userId', '==', userId)
+         .orderBy('createdAt', 'desc')
+         .get();
 
       const tasks = userTasksSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 
@@ -25,7 +28,6 @@ export const createTask = async (req: Request, res: Response): Promise<void> => 
          createdAt: new Date(),
          completed: false,
          userId,
-         status: TaskStatus.Creado
       };
 
       const newTask = await db.collection('tasks').add(task);

@@ -3,12 +3,14 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TaskService } from '../../core/services/task.service';
-import { Task } from '../../interfaces/task.interface';
+import { Task, TaskStatus } from '../../interfaces/task.interface';
 import { CommonModule } from '@angular/common';
+import { MatDividerModule } from '@angular/material/divider';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatSelectModule } from '@angular/material/select';
 
 @Component({
   selector: 'app-task-detail-page',
@@ -20,6 +22,8 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
     MatButtonModule,
     MatSlideToggleModule,
     CommonModule,
+    MatSelectModule,
+    MatDividerModule,
   ],
   templateUrl: './task-detail-page.component.html',
   styleUrls: ['./task-detail-page.component.scss'],
@@ -29,6 +33,7 @@ export class TaskDetailPageComponent implements OnInit {
   taskId: string | null = null;
   isLoading = false;
   isEditMode: boolean = false;
+  statuses: TaskStatus[] = Object.values(TaskStatus);
 
   constructor(
     private fb: FormBuilder,
@@ -53,6 +58,7 @@ export class TaskDetailPageComponent implements OnInit {
     this.taskForm = this.fb.group({
       title: ['', [Validators.required, Validators.maxLength(100)]],
       description: ['', [Validators.required, Validators.maxLength(500)]],
+      status: [{ value: TaskStatus.Creado, disabled: isReadonly }],
       completed: [{ value: false, disabled: isReadonly }],
     });
   }
@@ -100,6 +106,10 @@ export class TaskDetailPageComponent implements OnInit {
       },
       complete: () => (this.isLoading = false),
     });
+  }
+
+  getFilteredStatuses(currentStatus: string): string[] {
+    return this.statuses.filter((status) => status !== currentStatus && status !== TaskStatus.Completado);
   }
 
   onCancel(): void {

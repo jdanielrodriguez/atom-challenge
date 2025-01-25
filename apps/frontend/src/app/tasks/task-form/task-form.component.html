@@ -15,10 +15,10 @@
     </mat-form-field>
 
     <div class="actions">
+      <button mat-raised-button color="warn" type="button" (click)="onCancel()">Cancelar</button>
       <button mat-raised-button color="primary" type="submit" [disabled]="taskForm.invalid">
         {{ taskId ? 'Guardar Cambios' : 'Crear Tarea' }}
       </button>
-      <button mat-raised-button color="warn" type="button" (click)="onCancel()">Cancelar</button>
     </div>
   </form>
 </div>
