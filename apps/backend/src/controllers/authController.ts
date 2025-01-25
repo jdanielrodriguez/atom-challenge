@@ -1,13 +1,12 @@
 import { Request, Response } from 'express';
 import * as crypto from 'crypto';
-import { findUserByEmail, registerUser, loginUser } from '../services/authService';
+import { findUserByEmail, registerUser, loginUser, deleteUserByEmail } from '../services/authService';
 import { User } from '../interfaces/user.interface';
-import { deleteUserByEmail } from '../services/authService';
 
 export const checkEmail = async (req: Request, res: Response): Promise<void> => {
    try {
       const { email } = req.body;
-      const user = await findUserByEmail(email);
+      const user: User | null = await findUserByEmail(email);
 
       if (user) {
          res.status(200).json({ exists: true, message: 'User exists, proceed to login.' });
@@ -41,7 +40,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
    try {
       const { email, password } = req.body;
 
-      const { user, token } = await loginUser(email, password);
+      const { user, token }: { user: User; token: string } = await loginUser(email, password);
 
       res.status(200).json({ message: 'Login successful.', user, token });
    } catch (error: any) {

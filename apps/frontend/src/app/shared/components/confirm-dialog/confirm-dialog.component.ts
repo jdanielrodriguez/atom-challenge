@@ -1,3 +1,4 @@
+import { NgIf } from '@angular/common';
 import { Component, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogConfig } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
@@ -14,7 +15,7 @@ export const DEFAULT_DIALOG_CONFIG: MatDialogConfig = {
   templateUrl: './confirm-dialog.component.html',
   styleUrls: ['./confirm-dialog.component.scss'],
   standalone: true,
-  imports: [MatIconModule],
+  imports: [MatIconModule, NgIf],
 })
 export class ConfirmDialogComponent {
   constructor(

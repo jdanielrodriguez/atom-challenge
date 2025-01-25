@@ -86,7 +86,7 @@ export class LoginPageComponent {
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
         next: () => {
-          this.dialog.open(ConfirmDialogComponent, {
+          const dialogRef = this.dialog.open(ConfirmDialogComponent, {
             ...DEFAULT_DIALOG_CONFIG,
             ...{
               data: {
@@ -95,6 +95,11 @@ export class LoginPageComponent {
                 confirmText: 'Aceptar',
               }
             },
+          });
+          dialogRef.afterClosed().subscribe((result) => {
+            if (result) {
+              this.router.navigate(['/tasks']);
+            }
           });
         },
         error: (err) => {

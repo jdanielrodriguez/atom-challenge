@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, BehaviorSubject, catchError, throwError, tap } from 'rxjs';
+import { FirebaseService } from './firebase.service';
 import { User } from '../../interfaces/user.interface';
 
 @Injectable({ providedIn: 'root' })
@@ -8,7 +9,7 @@ export class AuthService {
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(this.hasToken());
   public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private firebaseService: FirebaseService) { }
 
   private hasToken(): boolean {
     return !!localStorage.getItem('token');
@@ -20,29 +21,40 @@ export class AuthService {
     );
   }
 
+  private async handleCustomToken(customToken: string): Promise<void> {
+    const userCredential = await this.firebaseService.signInWithToken(customToken);
+    const idToken = await this.firebaseService.getIdToken();
+    this.setToken(idToken);
+    this.isAuthenticatedSubject.next(true);
+  }
+
   login(email: string, password: string): Observable<any> {
     return this.http.post('/api/auth/login', { email, password }).pipe(
-      tap((response: any) => {
-        this.setToken(response.token);
-        this.isAuthenticatedSubject.next(true);
+      tap(async (response: any) => {
+        await this.handleCustomToken(response.token);
       }),
       catchError(this.handleError)
     );
   }
 
   register(user: { email: string }): Observable<User> {
-    return this.http.post<User>('/api/auth/register', user).pipe(
-      catchError((error: HttpErrorResponse) => {
-        const errorMessage = error.error?.message || 'Error desconocido';
-        return throwError(() => new Error(errorMessage));
-      })
+    return this.http.post(`/api/auth/register`, user).pipe(
+      tap(async (response: any) => {
+        await this.handleCustomToken(response.token);
+      }),
+      catchError(this.handleError)
     );
   }
 
   logout(): void {
-    this.http.post('/api/auth/logout', {}).subscribe(() => {
-      localStorage.removeItem('token');
-      this.isAuthenticatedSubject.next(false);
+    this.http.post('/api/auth/logout', {}).subscribe({
+      next: () => {
+        localStorage.removeItem('token');
+        this.isAuthenticatedSubject.next(true);
+      },
+      error: (err) => {
+        console.error('Error al cerrar sesión:', err);
+      },
     });
   }
 

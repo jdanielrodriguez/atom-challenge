@@ -1,8 +1,17 @@
 import FirebaseService from './firebaseService';
 import { User } from '../interfaces/user.interface';
 
-export const findUserByEmail = async (email: string) => {
-   return FirebaseService.getUserByEmail(email);
+export const findUserByEmail = async (email: string): Promise<User | null> => {
+   const userRecord = await FirebaseService.getUserByEmail(email);
+   if (!userRecord) return null;
+
+   return {
+      uid: userRecord.uid,
+      email: userRecord.email || '',
+      displayName: userRecord.displayName,
+      photoURL: userRecord.photoURL,
+      createdAt: new Date(),
+   };
 };
 
 export const registerUser = async (email: string, password: string): Promise<{ user: User; token: string }> => {
@@ -21,17 +30,23 @@ export const registerUser = async (email: string, password: string): Promise<{ u
    };
 };
 
-export const loginUser = async (email: string, password: string) => {
-   const user = await FirebaseService.getUserByEmail(email);
+export const loginUser = async (email: string, password: string): Promise<{ user: User; token: string }> => {
+   const userRecord = await FirebaseService.getUserByEmail(email);
 
-   if (!user) {
+   if (!userRecord) {
       throw new Error('User not found.');
    }
 
-   // Nota: Firebase Auth valida contraseñas en el cliente (frontend).
-   // Aquí asumimos que la contraseña ya fue validada.
+   const token = await FirebaseService.generateCustomToken(userRecord.uid);
 
-   const token = await FirebaseService.generateCustomToken(user.uid);
+   const user: User = {
+      uid: userRecord.uid,
+      email: userRecord.email || '', 
+      displayName: userRecord.displayName,
+      photoURL: userRecord.photoURL,
+      createdAt: new Date(),
+   };
+
    return { user, token };
 };
 
