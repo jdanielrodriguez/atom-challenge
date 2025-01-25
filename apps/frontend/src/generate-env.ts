@@ -1,10 +1,10 @@
 const dotenv = require('dotenv');
 const { writeFileSync } = require('fs');
+const path = require('path');
 
 dotenv.config();
 
-const envPath = './src/environments/environment.ts';
-
+const envPath = path.resolve(__dirname, './environments/environment.ts');
 const environmentFile = `
   export const environment = {
     apiKey: '${process.env["NG_APP_FIREBASE_API_KEY"]}',
@@ -16,5 +16,5 @@ const environmentFile = `
   };
 `;
 
-writeFileSync(envPath, environmentFile);
+writeFileSync(envPath, environmentFile, { encoding: 'utf8' });
 console.log(`Environment file generated at ${envPath}`);

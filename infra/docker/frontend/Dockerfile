@@ -12,6 +12,8 @@ COPY . .
 
 COPY .env .env
 
+RUN node src/generate-env.ts
+
 EXPOSE 4200
 
 CMD ["sh", "-c", "node src/generate-env.ts && ng serve --host 0.0.0.0"]
