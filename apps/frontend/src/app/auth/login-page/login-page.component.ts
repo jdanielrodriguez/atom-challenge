@@ -68,7 +68,7 @@ export class LoginPageComponent {
 
                 dialogRef.afterClosed().subscribe((result) => {
                   if (result) {
-                    this.router.navigate(['/auth/register']);
+                    this.registerUser(email);
                   }
                 });
               }
@@ -77,6 +77,40 @@ export class LoginPageComponent {
           });
       }
     }
+  }
+
+  private registerUser(email: string): void {
+    this.loading = true;
+    this.authService
+      .register({ email })
+      .pipe(finalize(() => (this.loading = false)))
+      .subscribe({
+        next: () => {
+          this.dialog.open(ConfirmDialogComponent, {
+            ...DEFAULT_DIALOG_CONFIG,
+            ...{
+              data: {
+                title: 'Usuario registrado',
+                message: 'El usuario fue registrado correctamente. Por favor revisa tu correo.',
+                confirmText: 'Aceptar',
+              }
+            },
+          });
+        },
+        error: (err) => {
+          console.error('Error registrando al usuario:', err);
+          this.dialog.open(ConfirmDialogComponent, {
+            ...DEFAULT_DIALOG_CONFIG,
+            ...{
+              data: {
+                title: 'Error',
+                message: 'Hubo un problema registrando el usuario. Por favor intenta de nuevo.',
+                confirmText: 'Aceptar',
+              }
+            },
+          });
+        },
+      });
   }
 
   onSubmit(): void {

@@ -1,5 +1,8 @@
 import { Request, Response } from 'express';
-import { findUserByEmail, registerUser, loginUser, verifyToken } from '../services/authService';
+import * as crypto from 'crypto';
+import { findUserByEmail, registerUser, loginUser } from '../services/authService';
+import { User } from '../interfaces/user.interface';
+import { deleteUserByEmail } from '../services/authService';
 
 export const checkEmail = async (req: Request, res: Response): Promise<void> => {
    try {
@@ -18,7 +21,14 @@ export const checkEmail = async (req: Request, res: Response): Promise<void> => 
 
 export const register = async (req: Request, res: Response): Promise<void> => {
    try {
-      const { email, password } = req.body;
+      const { email } = req.body;
+
+      if (!email) {
+         res.status(400).json({ error: 'Email is required.' });
+         return;
+      }
+
+      const password = crypto.randomBytes(10).toString('hex');
       const { user, token } = await registerUser(email, password);
 
       res.status(201).json({ message: 'User registered successfully.', user, token });
@@ -43,16 +53,19 @@ export const logout = (req: Request, res: Response): void => {
    res.status(200).json({ message: 'Logout successful.' });
 };
 
-export const me = async (req: Request, res: Response): Promise<void> => {
+export const deleteUser = async (req: Request, res: Response): Promise<void> => {
    try {
-      const token = req.headers.authorization?.split(' ')[1];
-      if (!token) {
-         res.status(401).json({ error: 'Unauthorized' });
+      const { email } = req.body;
+
+      if (!email) {
+         res.status(400).json({ error: 'Email is required.' });
          return;
       }
-      const user = await verifyToken(token);
-      res.status(200).json(user);
+
+      await deleteUserByEmail(email);
+
+      res.status(200).json({ message: 'User deleted successfully.' });
    } catch (error: any) {
-      res.status(401).json({ error: error.message });
+      res.status(500).json({ error: error.message });
    }
 };

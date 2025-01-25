@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, BehaviorSubject, catchError, throwError, tap } from 'rxjs';
+import { User } from '../../interfaces/user.interface';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -29,9 +30,12 @@ export class AuthService {
     );
   }
 
-  register(email: string, password: string): Observable<any> {
-    return this.http.post('/api/auth/register', { email, password }).pipe(
-      catchError(this.handleError)
+  register(user: { email: string }): Observable<User> {
+    return this.http.post<User>('/api/auth/register', user).pipe(
+      catchError((error: HttpErrorResponse) => {
+        const errorMessage = error.error?.message || 'Error desconocido';
+        return throwError(() => new Error(errorMessage));
+      })
     );
   }
 

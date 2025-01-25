@@ -39,6 +39,10 @@ class FirebaseService {
    getFirestore(): admin.firestore.Firestore {
       return this.firestore;
    }
+
+   async deleteUser(uid: string): Promise<void> {
+      await this.auth.deleteUser(uid);
+   }
 }
 
 export default new FirebaseService();

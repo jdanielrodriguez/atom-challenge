@@ -13,6 +13,6 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
       (req as any).user = decoded;
       next();
    } catch (error) {
-      res.status(401).json({ error: 'Invalid token' });
+      res.status(401).json({ error: 'Invalid token', details: error });
    }
 };
