@@ -48,7 +48,6 @@ services:
       - GOOGLE_APPLICATION_CREDENTIALS=/app/service-account.json
     command: npm run dev
 
-
   atom_challenge_firebase:
     container_name: atom_challenge_firebase
     build:
@@ -78,3 +77,12 @@ services:
         "firestore,functions,auth,database",
         "--project=atom-challenge-599be"
       ]
+  atom_challenge_mailhog:
+    image: mailhog/mailhog
+    container_name: atom_challenge_mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    networks:
+      atom_challenge_network:
+        ipv4_address: 192.168.100.6

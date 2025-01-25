@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import * as crypto from 'crypto';
 import { findUserByEmail, registerUser, loginUser, deleteUserByEmail } from '../services/authService';
 import { User } from '../interfaces/user.interface';
+import emailService from '../services/emailService';
 
 export const checkEmail = async (req: Request, res: Response): Promise<void> => {
    try {
@@ -29,7 +30,10 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
       const password = crypto.randomBytes(10).toString('hex');
       const { user, token } = await registerUser(email, password);
-
+      await emailService.sendEmail(email, 'Bienvenido a Atom Challenge', 'welcome', {
+         email,
+         password,
+      });
       res.status(201).json({ message: 'User registered successfully.', user, token });
    } catch (error: any) {
       res.status(500).json({ error: error.message });

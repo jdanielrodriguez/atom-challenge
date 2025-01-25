@@ -122,13 +122,32 @@ export class LoginPageComponent {
     if (this.loginForm.valid) {
       const { email, password } = this.loginForm.value;
       this.loading = true;
-      this.authService
-        .login(email, password)
-        .pipe(finalize(() => (this.loading = false)))
-        .subscribe({
-          next: () => this.router.navigate(['/tasks']),
-          error: (err) => console.error('Error en el login:', err),
-        });
+      this.authService.login(email, password).pipe(
+        finalize(() => (this.loading = false))
+      ).subscribe({
+        next: () => {
+          this.authService.isAuthenticated$.subscribe((isAuthenticated) => {
+            if (isAuthenticated) {
+              this.router.navigate(['/tasks']);
+            }
+          });
+        },
+        error: (err) => {
+          console.error('Error en el login:', err);
+          this.dialog.open(ConfirmDialogComponent, {
+            ...DEFAULT_DIALOG_CONFIG,
+            ...{
+              data: {
+                title: 'Error de inicio de sesión',
+                message: 'No se pudo iniciar sesión. Por favor, verifica tus credenciales.',
+                confirmText: 'Aceptar',
+              }
+            },
+          });
+        },
+      });
+    } else {
+      console.warn('Formulario no válido. Por favor, completa todos los campos requeridos.');
     }
   }
 }

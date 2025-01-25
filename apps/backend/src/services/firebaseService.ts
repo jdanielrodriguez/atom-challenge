@@ -12,7 +12,6 @@ class FirebaseService {
       }
       this.auth = admin.auth();
       this.firestore = admin.firestore();
-
    }
 
    async createUser(email: string, password: string): Promise<admin.auth.UserRecord> {
@@ -26,6 +25,22 @@ class FirebaseService {
          if (error.code === 'auth/user-not-found') return null;
          throw error;
       }
+   }
+
+   async validatePassword(email: string, password: string): Promise<boolean> {
+      const url = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${process.env.FIREBASE_API_KEY}`;
+      const response = await fetch(url, {
+         method: 'POST',
+         headers: { 'Content-Type': 'application/json' },
+         body: JSON.stringify({ email, password, returnSecureToken: true }),
+      });
+
+      if (!response.ok) {
+         throw new Error(`Invalid credentials for email: ${email}`);
+      }
+
+      const data = await response.json();
+      return !!data.idToken;
    }
 
    async generateCustomToken(uid: string): Promise<string> {

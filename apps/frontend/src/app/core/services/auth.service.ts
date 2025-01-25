@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Observable, BehaviorSubject, catchError, throwError, tap } from 'rxjs';
+import { Observable, BehaviorSubject, throwError } from 'rxjs';
+import { catchError, tap } from 'rxjs/operators';
 import { FirebaseService } from './firebase.service';
 import { User } from '../../interfaces/user.interface';
 
@@ -15,47 +16,53 @@ export class AuthService {
     return !!localStorage.getItem('token');
   }
 
-  checkEmail(email: string): Observable<any> {
-    return this.http.post('/api/auth/check-email', { email }).pipe(
-      catchError(this.handleError)
-    );
+  private updateAuthState(token: string | null): void {
+    if (token) {
+      localStorage.setItem('token', token);
+      this.isAuthenticatedSubject.next(true);
+    } else {
+      localStorage.removeItem('token');
+      this.isAuthenticatedSubject.next(false);
+    }
   }
 
-  private async handleCustomToken(customToken: string): Promise<void> {
-    const userCredential = await this.firebaseService.signInWithToken(customToken);
-    const idToken = await this.firebaseService.getIdToken();
-    this.setToken(idToken);
-    this.isAuthenticatedSubject.next(true);
+  private processAuthentication(token: string): void {
+    this.firebaseService
+      .signInWithToken(token)
+      .then(() => this.firebaseService.getIdToken())
+      .then((idToken) => this.updateAuthState(idToken))
+      .catch((err) => console.error('Error during Firebase authentication:', err));
+  }
+
+  checkEmail(email: string): Observable<any> {
+    return this.http.post('/api/auth/check-email', { email }).pipe(catchError(this.handleError));
   }
 
   login(email: string, password: string): Observable<any> {
     return this.http.post('/api/auth/login', { email, password }).pipe(
-      tap(async (response: any) => {
-        await this.handleCustomToken(response.token);
-      }),
+      tap((response: any) => this.processAuthentication(response.token)),
       catchError(this.handleError)
     );
   }
 
   register(user: { email: string }): Observable<User> {
     return this.http.post(`/api/auth/register`, user).pipe(
-      tap(async (response: any) => {
-        await this.handleCustomToken(response.token);
-      }),
+      tap((response: any) => this.processAuthentication(response.token)),
       catchError(this.handleError)
     );
   }
 
-  logout(): void {
-    this.http.post('/api/auth/logout', {}).subscribe({
-      next: () => {
+  logout(): Observable<any> {
+    return this.http.post('/api/auth/logout', {}).pipe(
+      tap(() => {
+        this.isAuthenticatedSubject.next(false);
         localStorage.removeItem('token');
-        this.isAuthenticatedSubject.next(true);
-      },
-      error: (err) => {
-        console.error('Error al cerrar sesión:', err);
-      },
-    });
+      }),
+      catchError((error) => {
+        console.error('Error cerrando sesión:', error);
+        return throwError(() => new Error(error.message));
+      })
+    );
   }
 
   setToken(token: string): void {
@@ -67,7 +74,7 @@ export class AuthService {
   }
 
   isAuthenticated(): boolean {
-    return !!this.getToken();
+    return this.isAuthenticatedSubject.getValue();
   }
 
   private handleError(error: HttpErrorResponse): Observable<never> {

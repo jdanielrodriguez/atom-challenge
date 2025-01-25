@@ -31,6 +31,12 @@ export const registerUser = async (email: string, password: string): Promise<{ u
 };
 
 export const loginUser = async (email: string, password: string): Promise<{ user: User; token: string }> => {
+   const isValid = await FirebaseService.validatePassword(email, password);
+
+   if (!isValid) {
+      throw new Error('Invalid email or password.');
+   }
+
    const userRecord = await FirebaseService.getUserByEmail(email);
 
    if (!userRecord) {
@@ -41,7 +47,7 @@ export const loginUser = async (email: string, password: string): Promise<{ user
 
    const user: User = {
       uid: userRecord.uid,
-      email: userRecord.email || '', 
+      email: userRecord.email || '',
       displayName: userRecord.displayName,
       photoURL: userRecord.photoURL,
       createdAt: new Date(),
