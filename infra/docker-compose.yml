@@ -75,7 +75,7 @@ services:
         "emulators:start",
         "--only",
         "firestore,functions,auth,database",
-        "--project=atom-challenge-599be"
+        "--project=atom-challenge-bdcd0"
       ]
   atom_challenge_mailhog:
     image: mailhog/mailhog

@@ -89,7 +89,33 @@ Asegúrate de tener instalado lo siguiente en tu sistema:
    NG_APP_PUBLIC_KEY=NG_APP_PUBLIC_KEY_VALUE
    ```
 
-4. **Instalar Dependencias**:
+4. **Actualizar Docker Compose y Firebase Config**:
+   - Asegúrate de actualizar el **ID del Proyecto** en los siguientes archivos:
+     
+     **Docker Compose** (`infra/docker-compose.yml`):
+     ```yaml
+     entrypoint:
+       [
+         "firebase",
+         "emulators:start",
+         "--only",
+         "firestore,functions,auth,database",
+         "--project=${FIREBASE_PROJECT_ID}"
+       ]
+     ```
+
+     **Firebase Config** (`infra/firebase/.firebaserc`):
+     ```json
+     {
+       "projects": {
+         "default": "${FIREBASE_PROJECT_ID}"
+       }
+     }
+     ```
+
+     > Nota: Si usas `.env`, puedes usar un script para inyectar las variables en estos archivos antes de levantar los servicios.
+
+5. **Instalar Dependencias**:
 
    - En el **frontend**:
      ```bash
@@ -109,7 +135,7 @@ Asegúrate de tener instalado lo siguiente en tu sistema:
      npm install
      ```
 
-5. **Levantar los Servicios con Docker**:
+6. **Levantar los Servicios con Docker**:
 
    Desde la raíz del proyecto, ejecuta:
    ```bash

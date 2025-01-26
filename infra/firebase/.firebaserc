@@ -1,7 +1,6 @@
 {
   "projects": {
-    "default": "atom-challenge-599be",
-    "atom-challenge-599be": "atom-challenge-599be"
+    "default": "atom-challenge-bdcd0"
   },
   "targets": {},
   "etags": {}
