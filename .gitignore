@@ -3,6 +3,7 @@
 /infra/firebase/*debug*
 *node_modules*
 *.env
+*.env.prod
 *.vscode
 /apps/backend/service-account.json
 *dist
