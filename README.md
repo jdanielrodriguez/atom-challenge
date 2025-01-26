@@ -103,6 +103,12 @@ Asegúrate de tener instalado lo siguiente en tu sistema:
      npm install
      ```
 
+   - En el **firebase**:
+     ```bash
+     cd infra/firebase/functions
+     npm install
+     ```
+
 5. **Levantar los Servicios con Docker**:
 
    Desde la raíz del proyecto, ejecuta:
