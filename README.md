@@ -1,6 +1,6 @@
 # **Atom Challenge - Fullstack Application**
 
-Este proyecto es una aplicación de lista de tareas desarrollada con **Angular** para el frontend, **Express** en el backend, y utilizando **Firebase** para la base de datos y autenticación. Todo está configurado para correr en contenedores Docker y utiliza **Yarn** como gestor de paquetes.
+Este proyecto es una aplicación de lista de tareas desarrollada con **Angular** para el frontend, **Express** en el backend, y utilizando **Firebase** para la base de datos y autenticación. Está configurado para ejecutarse en contenedores Docker y utiliza **Yarn** como gestor de paquetes en el frontend y **npm** en el backend.
 
 ---
 
@@ -8,18 +8,21 @@ Este proyecto es una aplicación de lista de tareas desarrollada con **Angular**
 
 1. **Frontend**:
    - Construido con Angular 17.
-   - Administración de estado con NgRx.
-   - Interfaz moderna usando Angular Material.
-   - Comunicación con el backend a través de HTTP Interceptors.
+   - Uso de Angular Material para una interfaz moderna y responsiva.
+   - Administración de estados reactiva mediante RxJS.
+   - Comunicación segura con el backend usando interceptores HTTP.
+   - Implementación de encriptación RSA para proteger las contraseñas en tránsito.
 
 2. **Backend**:
    - API REST desarrollada con Express y TypeScript.
-   - Integración con Firebase Admin SDK para Firestore y autenticación.
+   - Autenticación y gestión de usuarios mediante Firebase Admin SDK.
    - Middleware de autenticación para proteger las rutas privadas.
+   - Encriptación y desencriptación de contraseñas utilizando claves RSA.
 
 3. **Firebase**:
    - Uso del emulador para desarrollo local.
    - Configuración para Firestore, Authentication y Realtime Database.
+   - Generación de tokens personalizados para gestionar la autenticación.
 
 ---
 
@@ -27,7 +30,7 @@ Este proyecto es una aplicación de lista de tareas desarrollada con **Angular**
 
 Asegúrate de tener instalado lo siguiente en tu sistema:
 
-- **Node.js** (versión 18).
+- **Node.js** (versión 18 o superior).
 - **Yarn** como gestor de paquetes.
 - **Docker** y **Docker Compose**.
 - Una cuenta de Google Cloud configurada para Firebase.
@@ -56,19 +59,49 @@ Asegúrate de tener instalado lo siguiente en tu sistema:
    Crea un archivo `.env` en `apps/backend/` basado en el ejemplo proporcionado (`.env.example`):
 
    ```env
-   FIREBASE_SERVICE_ACCOUNT_PATH=/app/service-account.json
+   NODE_ENV=development
+   GOOGLE_APPLICATION_CREDENTIALS=/app/service-account.json
    PORT=3000
+   USE_FIRESTORE_EMULATOR=true
+   MAIL_HOST=192.168.100.6
+   MAIL_PORT=1025
+   MAIL_FROM=no-reply@atom-challenge.local
+   FIREBASE_API_KEY=FIREBASE_API_KEY_VALUE
+   FIREBASE_AUTH_DOMAIN=FIREBASE_AUTH_DOMAIN_VALUE
+   FIREBASE_PROJECT_ID=FIREBASE_PROJECT_ID_VALUE
+   FIREBASE_STORAGE_BUCKET=FIREBASE_STORAGE_BUCKET_VALUE
+   FIREBASE_MESSAGING_SENDER_ID=FIREBASE_MESSAGING_SENDER_ID_VALUE
+   FIREBASE_APP_ID=FIREBASE_APP_ID_VALUE
+   FIREBASE_MEASUREMENT_ID=FIREBASE_MEASUREMENT_ID_VALUE
+   PRIVATE_KEY=PRIVATE_KEY_VALUE
+   ```
+
+   Crea un archivo `.env` en `apps/frontend/` basado en el ejemplo proporcionado (`.env.example`):
+
+   ```env
+   NG_APP_FIREBASE_API_KEY=NG_APP_FIREBASE_API_KEY_VALUE
+   NG_APP_FIREBASE_AUTH_DOMAIN=NG_APP_FIREBASE_AUTH_DOMAIN_VALUE
+   NG_APP_FIREBASE_PROJECT_ID=NG_APP_FIREBASE_PROJECT_ID_VALUE
+   NG_APP_FIREBASE_STORAGE_BUCKET=NG_APP_FIREBASE_STORAGE_BUCKET_VALUE
+   NG_APP_FIREBASE_MESSAGING_SENDER_ID=NG_APP_FIREBASE_MESSAGING_SENDER_ID_VALUE
+   NG_APP_FIREBASE_APP_ID=NG_APP_FIREBASE_APP_ID_VALUE
+   NG_APP_FIREBASE_MEASUREMENT_ID=NG_APP_FIREBASE_MEASUREMENT_ID_VALUE
+   NG_APP_PUBLIC_KEY=NG_APP_PUBLIC_KEY_VALUE
    ```
 
 4. **Instalar Dependencias**:
 
-   En lugar de `npm`, este proyecto utiliza Yarn. Ejecuta los siguientes comandos:
+   - En el **frontend**:
+     ```bash
+     cd apps/frontend
+     yarn install
+     ```
 
-   ```bash
-   yarn install
-   ```
-
-   Repite este comando en las carpetas `apps/frontend` y `apps/backend`.
+   - En el **backend**:
+     ```bash
+     cd apps/backend
+     npm install
+     ```
 
 5. **Levantar los Servicios con Docker**:
 
@@ -131,6 +164,45 @@ docker-compose -f infra/docker-compose.yml down
    - **Backend Health Check**: `http://localhost:3000/api/health`
    - **Frontend**: `http://localhost:4201`
    - **Firebase Emulator UI**: `http://localhost:4000`
+
+---
+
+## **Consideraciones de Seguridad**
+
+- Todas las contraseñas se encriptan utilizando RSA antes de enviarse al backend.
+- Asegúrate de que las claves públicas y privadas utilizadas en el frontend y backend estén correctamente configuradas.
+- Para generar las claves públicas y privadas necesarias para el sistema:
+
+  1. **Usa OpenSSL para generar un par de claves RSA:**
+
+     ```bash
+     openssl genpkey -algorithm RSA -out private_key.pem -pkeyopt rsa_keygen_bits:2048
+     openssl rsa -pubout -in private_key.pem -out public_key.pem
+     ```
+
+     Esto generará:
+     - `private_key.pem`: Clave privada que debes configurar en el backend (`PRIVATE_KEY` en el `.env`).
+     - `public_key.pem`: Clave pública que debes configurar en el frontend (`NG_APP_PUBLIC_KEY` en el `.env`).
+
+  2. **Protege tu clave privada:**
+     - Asegúrate de que el archivo de la clave privada no sea subido al repositorio.
+     - Establece permisos restringidos:
+
+       ```bash
+       chmod 600 private_key.pem
+       ```
+
+  3. **Verifica las claves:**
+     - Puedes revisar el contenido de las claves generadas para asegurarte de que son válidas:
+
+       ```bash
+       cat private_key.pem
+       cat public_key.pem
+       ```
+
+  4. **Copiar las claves en las configuraciones correspondientes:**
+     - **Frontend:** Incluye el contenido de `public_key.pem` en el archivo `.env` del frontend bajo `NG_APP_PUBLIC_KEY`.
+     - **Backend:** Incluye el contenido de `private_key.pem` en el archivo `.env` del backend bajo `PRIVATE_KEY`.
 
 ---
 
