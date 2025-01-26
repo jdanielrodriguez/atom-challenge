@@ -58,6 +58,10 @@ class FirebaseService {
    async deleteUser(uid: string): Promise<void> {
       await this.auth.deleteUser(uid);
    }
+
+   formatTimestamp(date: Date) {
+      return admin.firestore.Timestamp.fromDate(date);
+   }
 }
 
 export default new FirebaseService();

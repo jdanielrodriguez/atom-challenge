@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import FirebaseService from '../services/firebaseService';
-import { Task, TaskStatus } from '../interfaces/task.interface';
+import { Task } from '../interfaces/task.interface';
 
 export const getTasks = async (req: Request, res: Response): Promise<void> => {
    try {
@@ -25,7 +25,7 @@ export const createTask = async (req: Request, res: Response): Promise<void> => 
       const userId = (req as any).user.id;
       const task: Task = {
          ...req.body,
-         createdAt: new Date(),
+         createdAt: FirebaseService.formatTimestamp(new Date()),
          completed: false,
          userId,
       };

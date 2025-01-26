@@ -62,6 +62,8 @@ export class AuthService {
       }),
       catchError((error) => {
         console.error('Error cerrando sesión:', error);
+        this.isAuthenticatedSubject.next(false);
+        localStorage.removeItem('token');
         return throwError(() => new Error(error.message));
       })
     );

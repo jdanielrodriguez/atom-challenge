@@ -9,13 +9,14 @@ import {
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Router } from '@angular/router';
+import { AuthService } from '../services/auth.service';
 
 @Injectable()
 export class ApiInterceptor implements HttpInterceptor {
   private readonly baseUrl = 'http://localhost:3000';
   private readonly whitelist = ['/auth/login', '/auth/register'];
 
-  constructor(private router: Router) { }
+  constructor(private router: Router, private authService: AuthService) { }
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const fullUrl = req.url.startsWith('http') ? req.url : `${this.baseUrl}${req.url}`;
@@ -25,7 +26,7 @@ export class ApiInterceptor implements HttpInterceptor {
       return next.handle(apiReq).pipe(catchError((error) => this.handleError(error)));
     }
 
-    const token = localStorage.getItem('token');
+    const token = this.authService.getToken();
     if (token) {
       const authReq = req.clone({
         url: fullUrl,
@@ -46,10 +47,11 @@ export class ApiInterceptor implements HttpInterceptor {
   private handleError(error: HttpErrorResponse): Observable<never> {
     if (error.status === 401 && error.error?.details.code === 'auth/id-token-expired') {
       console.warn('Token expirado, cerrando sesión.');
-      localStorage.removeItem('token');
-      setTimeout(() => {
-        this.router.navigate(['/auth/login']);
-      }, 1000);
+      this.authService.logout().subscribe({
+        next: () => {
+          this.router.navigate(['/auth/login']);
+        },
+      });
     } else if (error.status === 401) {
       console.error('Solicitud no autorizada:', error.message);
     } else {

@@ -33,6 +33,13 @@ export class TaskService {
     return task;
   }
 
+  private getDate(createdAt: { _nanoseconds: number; _seconds: number; } | Date): Date {
+    if (createdAt instanceof Date) {
+      return createdAt;
+    }
+    return new Date(createdAt._seconds * 1000);
+  }
+
   private transformTasksDates(tasks: Task[]): Task[] {
     return tasks.map(task => {
       if (task.createdAt && typeof task.createdAt === 'object' && '_seconds' in task.createdAt) {
@@ -42,6 +49,10 @@ export class TaskService {
         };
       }
       return task;
+    }).sort((a, b) => {
+      const dateA = this.getDate(a.createdAt);
+      const dateB = this.getDate(b.createdAt);
+      return dateB.getTime() - dateA.getTime();
     });
   }
 

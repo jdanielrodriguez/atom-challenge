@@ -1,47 +1,5 @@
 <div class="task-detail-container">
   <h1>{{ isEditMode ? 'Editar Tarea' : 'Nueva Tarea' }}</h1>
-  <form [formGroup]="taskForm" (ngSubmit)="onSubmit()" class="task-form">
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Título</mat-label>
-      <input matInput formControlName="title" type="text" required />
-      <mat-error *ngIf="taskForm.get('title')?.invalid && taskForm.get('title')?.touched">
-        Título es requerido
-      </mat-error>
-    </mat-form-field>
-
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Descripción</mat-label>
-      <textarea matInput formControlName="description" rows="3" required></textarea>
-      <mat-error *ngIf="taskForm.get('description')?.invalid && taskForm.get('description')?.touched">
-        Descripción es requerida
-      </mat-error>
-    </mat-form-field>
-
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Estado</mat-label>
-      <mat-select formControlName="status">
-        <mat-option [value]="taskForm.get('status')?.value" disabled>
-          Estado actual: <span class="mat-option-content">{{ taskForm.get('status')?.value }}</span>
-        </mat-option>
-        <mat-divider></mat-divider>
-        <mat-option *ngFor="let status of getFilteredStatuses(taskForm.get('status')?.value)" [value]="status">
-          Cambiar a: <span class="mat-option-content">{{ status }}</span>
-        </mat-option>
-      </mat-select>
-      <mat-error *ngIf="taskForm.get('status')?.invalid && taskForm.get('status')?.touched">
-        Estado es requerido
-      </mat-error>
-    </mat-form-field>
-
-    <mat-slide-toggle *ngIf="isEditMode" formControlName="completed" >
-      {{ taskForm.get('completed')?.value ? 'Completada' : 'Pendiente'}}
-    </mat-slide-toggle>
-
-    <div class="actions">
-      <button mat-raised-button color="warn" type="button" (click)="onCancel()">Cancelar</button>
-      <button mat-raised-button color="primary" type="submit" [disabled]="taskForm.invalid">
-        {{ isEditMode ? 'Actualizar' : 'Crear' }}
-      </button>
-    </div>
-  </form>
+  <app-task-form [task]="task" [statuses]="statuses" [readonly]="isReadonly" [isLoading]="isLoading"
+    (save)="onSave($event)" (cancel)="onCancel()"></app-task-form>
 </div>

@@ -35,6 +35,7 @@ export class UserMenuComponent implements OnInit {
       ...{
         panelClass: 'change-password-dialog-container',
         height: '50%',
+        disableClose: true,
       }
     });
   }

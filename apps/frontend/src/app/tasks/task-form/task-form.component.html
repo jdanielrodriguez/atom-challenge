@@ -1,24 +1,39 @@
-<div class="form-container">
-  <h1 *ngIf="taskId">Editar Tarea</h1>
-  <h1 *ngIf="!taskId">Nueva Tarea</h1>
+<form [formGroup]="taskForm" (ngSubmit)="onSubmit()">
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Título</mat-label>
+    <input matInput formControlName="title" placeholder="Ingresa el título" required />
+    <mat-error *ngIf="taskForm.get('title')?.hasError('required')">El título es obligatorio</mat-error>
+  </mat-form-field>
 
-  <form [formGroup]="taskForm" (ngSubmit)="onSubmit()">
-    <mat-form-field class="full-width">
-      <mat-label>Título</mat-label>
-      <input matInput formControlName="title" placeholder="Ingresa el título" required />
-      <mat-error *ngIf="taskForm.get('title')?.hasError('required')">El título es obligatorio</mat-error>
-    </mat-form-field>
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Descripción</mat-label>
+    <textarea matInput formControlName="description" placeholder="Ingresa una descripción"></textarea>
+  </mat-form-field>
 
-    <mat-form-field class="full-width">
-      <mat-label>Descripción</mat-label>
-      <textarea matInput formControlName="description" placeholder="Ingresa una descripción"></textarea>
-    </mat-form-field>
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Estado</mat-label>
+    <mat-select formControlName="status">
+      <mat-option [value]="taskForm.get('status')?.value" disabled>
+        Estado actual: <span class="mat-option-content">{{ taskForm.get('status')?.value }}</span>
+      </mat-option>
+      <mat-divider></mat-divider>
+      <mat-option *ngFor="let status of getFilteredStatuses(taskForm.get('status')?.value)" [value]="status">
+        Cambiar a: <span class="mat-option-content">{{ status }}</span>
+      </mat-option>
+    </mat-select>
+    <mat-error *ngIf="taskForm.get('status')?.invalid && taskForm.get('status')?.touched">
+      Estado es requerido
+    </mat-error>
+  </mat-form-field>
 
-    <div class="actions">
-      <button mat-raised-button color="warn" type="button" (click)="onCancel()">Cancelar</button>
-      <button mat-raised-button color="primary" type="submit" [disabled]="taskForm.invalid">
-        {{ taskId ? 'Guardar Cambios' : 'Crear Tarea' }}
-      </button>
-    </div>
-  </form>
-</div>
+  <mat-slide-toggle formControlName="completed" *ngIf="task?.id">
+    {{ taskForm.get('completed')?.value ? 'Completada' : 'Pendiente' }}
+  </mat-slide-toggle>
+
+  <div class="actions">
+    <button mat-raised-button color="warn" type="button" (click)="onCancel()" [disabled]="isLoading">Cancelar</button>
+    <button mat-raised-button color="primary" type="submit" [disabled]="taskForm.invalid || isLoading">
+      {{ isLoading ? 'Cargando...' : task?.id ? 'Guardar Cambios' : 'Crear Tarea' }}
+    </button>
+  </div>
+</form>
