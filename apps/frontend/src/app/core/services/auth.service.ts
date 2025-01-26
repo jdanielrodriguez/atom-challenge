@@ -54,10 +54,17 @@ export class AuthService {
 
   logout(): Observable<any> {
     return this.http.post('/api/auth/logout', {}).pipe(
-      tap(() => this.cleanUpSession()),
-      catchError(this.handleError)
+      tap(() => {
+        this.cleanUpSession();
+      }),
+      catchError((error) => {
+        console.warn('Error cerrando sesión, limpiando sesión localmente:', error.message);
+        this.cleanUpSession();
+        return throwError(() => new Error('Error cerrando sesión'));
+      })
     );
   }
+
 
   cleanUpSession(): void {
     localStorage.removeItem('token');
@@ -99,11 +106,12 @@ export class AuthService {
   }
 
   private handleError(error: HttpErrorResponse): Observable<never> {
-    const errorMessage =
-      error.error instanceof ErrorEvent
-        ? `Error: ${error.error.message}`
-        : `Error Code: ${error.status}\nMessage: ${error.message}`;
-
+    let errorMessage = 'Ocurrió un error inesperado.';
+    if (error.error?.message) {
+      errorMessage = error.error.message;
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
     return throwError(() => new Error(errorMessage));
   }
 }

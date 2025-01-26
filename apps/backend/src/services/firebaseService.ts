@@ -62,6 +62,10 @@ class FirebaseService {
    formatTimestamp(date: Date) {
       return admin.firestore.Timestamp.fromDate(date);
    }
+
+   updateUserPassword = async (uid: string, newPassword: string): Promise<void> => {
+      await admin.auth().updateUser(uid, { password: newPassword });
+   };
 }
 
 export default new FirebaseService();

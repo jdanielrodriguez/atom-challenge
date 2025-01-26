@@ -56,8 +56,27 @@ export const loginUser = async (email: string, password: string): Promise<{ user
    return { user, token };
 };
 
+export const updateUserPassword = async (email: string, newPassword: string): Promise<void> => {
+   const user = await findUserByEmail(email);
+
+   if (!user) {
+      throw new Error('User not found.');
+   }
+
+   await FirebaseService.updateUserPassword(user.uid, newPassword);
+};
+
+export const generateTokenForUser = async (uid: string): Promise<string> => {
+   return FirebaseService.generateCustomToken(uid);
+};
+
 export const verifyToken = async (token: string) => {
    return FirebaseService.verifyIdToken(token);
+};
+
+export const validateCurrentPassword = async (email: string, currentPassword: string): Promise<boolean> => {
+   const isValid = await FirebaseService.validatePassword(email, currentPassword);
+   return isValid;
 };
 
 export const deleteUserByEmail = async (email: string): Promise<void> => {

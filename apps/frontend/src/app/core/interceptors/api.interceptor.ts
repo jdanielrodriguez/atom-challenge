@@ -41,25 +41,22 @@ export class ApiInterceptor implements HttpInterceptor {
   }
 
   private handleError(error: HttpErrorResponse): Observable<never> {
+    let errorMessage = 'Error desconocido.';
     if (error.status === 401 && error.error?.details?.code === 'auth/id-token-expired') {
       console.warn('Token expirado, cerrando sesión.');
-      return this.authService.logout().pipe(
-        tap(() => this.router.navigate(['/auth/login'])),
-        catchError((err) => {
-          console.error('Error cerrando sesión:', err);
-          this.authService.cleanUpSession();
-          return throwError(() => new Error(err.message));
-        }),
-        switchMap(() => throwError(() => new Error('Token expirado')))
-      );
+      this.authService.cleanUpSession();
+      errorMessage = error.error.message || 'Token expirado, cerrando sesión.';
+      this.router.navigate(['/auth/login']);
+      return throwError(() => new Error(errorMessage));
     }
-
-    if (error.status === 401) {
-      console.error('Solicitud no autorizada:', error.message);
+    if (error.error instanceof ErrorEvent) {
+      errorMessage = error.error.message || 'Error en el cliente.';
+    } else if (error.error?.message) {
+      errorMessage = error.error.message;
     } else {
-      console.error('Error en la solicitud:', error.message);
+      errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}`;
     }
 
-    return throwError(() => new Error(error.message));
+    return throwError(() => new Error(errorMessage));
   }
 }

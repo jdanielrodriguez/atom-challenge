@@ -75,9 +75,8 @@ export class ChangePasswordDialogComponent implements OnInit {
         this.isLoading = false;
         this.dialogRef.close();
       },
-      error: (err) => {
-        this.snackBar.open('Error al cambiar la contraseña.', 'Cerrar', { duration: 3000 });
-        console.error('Error al cambiar la contraseña:', err);
+      error: (err: Error) => {
+        this.snackBar.open(err.message || 'Error al cambiar la contraseña.', 'Cerrar', { duration: 3000 });
         this.isLoading = false;
       },
     });

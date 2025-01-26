@@ -1,19 +1,37 @@
-<html>
+<html lang="en">
   <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bienvenido</title>
     <style>
       body { font-family: Arial, sans-serif; background-color: #f4f4f4; padding:
-      20px; } .container { background-color: #ffffff; border-radius: 8px;
-      padding: 20px; max-width: 500px; margin: auto; box-shadow: 0 4px 8px
-      rgba(0, 0, 0, 0.1); } .button { display: inline-block; background-color:
-      #3f51b5; color: #ffffff; padding: 10px 20px; border-radius: 4px;
-      text-decoration: none; font-weight: bold; }
+      20px; margin: 0; } .container { background-color: #ffffff; border-radius:
+      8px; padding: 20px; max-width: 500px; margin: auto; box-shadow: 0 4px 12px
+      rgba(0, 0, 0, 0.15); } h1 { color: #3f51b5; font-size: 1.8rem;
+      margin-bottom: 10px; } p { color: #333333; line-height: 1.6; margin: 10px
+      0; } .button { display: inline-block; background-color: #3f51b5; color:
+      #ffffff; padding: 10px 20px; border-radius: 4px; text-decoration: none;
+      font-weight: bold; margin-top: 20px; } .footer { margin-top: 20px;
+      font-size: 0.9rem; color: #555555; text-align: center; } .strong { color:
+      #3f51b5; font-weight: bold; }
     </style>
   </head>
   <body>
     <div class="container">
       <h1>Bienvenido, {{email}}!</h1>
-      <p>Tu cuenta ha sido creada exitosamente.</p>
-      <p>Contraseña generada: <strong>{{password}}</strong></p>
+      <p>¡Estamos emocionados de que te unas a nosotros!</p>
+      <p>
+        Tu cuenta ha sido creada exitosamente. Puedes usar la siguiente
+        contraseña para iniciar sesión en tu cuenta:
+      </p>
+      <p class="strong">Contraseña generada: <strong>{{password}}</strong></p>
+      <p>
+        Por razones de seguridad, te recomendamos que cambies esta contraseña
+        tan pronto como sea posible desde tu cuenta.
+      </p>
+      <div class="footer">
+        <p>Atom Challenge - Todos los derechos reservados.</p>
+      </div>
     </div>
   </body>
 </html>
