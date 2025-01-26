@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ConfirmDialogComponent, DEFAULT_DIALOG_CONFIG } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { AuthService } from '../../core/services/auth.service';
+import { EncryptionService } from '../../core/services/encryption.service';
 import { finalize } from 'rxjs';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
@@ -30,6 +31,7 @@ export class LoginPageComponent {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
+    private encryptionService: EncryptionService,
     private router: Router,
     private dialog: MatDialog
   ) {
@@ -124,8 +126,10 @@ export class LoginPageComponent {
       if (!password) {
         return;
       }
+      const encryptedPassword = this.encryptionService.encrypt(password);
+
       this.loading = true;
-      this.authService.login(email, password).pipe(
+      this.authService.login(email, encryptedPassword).pipe(
         finalize(() => (this.loading = false))
       ).subscribe({
         next: () => {
@@ -162,5 +166,53 @@ export class LoginPageComponent {
     } else {
       console.warn('Formulario no válido. Por favor, completa todos los campos requeridos.');
     }
+  }
+
+  onRecoverPassword(): void {
+    const emailControl = this.loginForm.get('email');
+
+    if (!emailControl || emailControl.invalid) {
+      this.dialog.open(ConfirmDialogComponent, {
+        ...DEFAULT_DIALOG_CONFIG,
+        ...{
+          data: {
+            title: 'Correo inválido',
+            message: 'Por favor, introduce un correo válido antes de recuperar tu contraseña.',
+            confirmText: 'Aceptar',
+          },
+        },
+      });
+      return;
+    }
+
+    const email = emailControl.value;
+
+    this.authService.resetPassword(email).subscribe({
+      next: () => {
+        this.dialog.open(ConfirmDialogComponent, {
+          ...DEFAULT_DIALOG_CONFIG,
+          ...{
+            data: {
+              title: 'Solicitud enviada',
+              message: 'Se ha enviado un correo con las instrucciones para recuperar tu contraseña.',
+              confirmText: 'Aceptar',
+            },
+          },
+        });
+      },
+      error: (err) => {
+        console.error('Error en la recuperación de contraseña:', err);
+        this.dialog.open(ConfirmDialogComponent, {
+          ...DEFAULT_DIALOG_CONFIG,
+          ...{
+            data: {
+              title: 'Error',
+              message: 'Hubo un problema enviando la recuperación de contraseña. Intenta de nuevo más tarde.',
+              confirmText: 'Aceptar',
+            },
+          },
+        });
+      },
+    });
   }
 }

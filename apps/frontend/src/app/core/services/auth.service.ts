@@ -52,6 +52,12 @@ export class AuthService {
     );
   }
 
+  resetPassword(email: string): Observable<any> {
+    return this.http.post('/api/auth/reset-password', { email }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
   logout(): Observable<any> {
     return this.http.post('/api/auth/logout', {}).pipe(
       tap(() => {

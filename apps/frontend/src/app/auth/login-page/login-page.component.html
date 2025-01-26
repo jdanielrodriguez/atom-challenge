@@ -16,10 +16,13 @@
         <mat-error *ngIf="loginForm.get('password')?.invalid">Introduce tu contraseña</mat-error>
       </mat-form-field>
 
-      <button mat-raised-button color="primary" type="submit" [disabled]="(loginForm.invalid && loginForm.get('password')?.enabled) || loading"
-        class="full-width">
+      <button mat-raised-button color="primary" type="submit"
+        [disabled]="(loginForm.invalid && loginForm.get('email')?.touched) || loading" class="full-width">
         {{ loading ? 'Cargando...' : 'Login' }}
       </button>
     </form>
+    <div class="recover-password-container">
+      <button type="button" mat-button (click)="onRecoverPassword()">¿Olvidaste tu contraseña?</button>
+    </div>
   </div>
 </div>

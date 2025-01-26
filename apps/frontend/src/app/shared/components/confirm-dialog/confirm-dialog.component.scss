@@ -35,7 +35,6 @@
   font-size: 1.5rem;
   font-weight: bold;
   color: #3f51b5;
-  margin-bottom: 16px;
   padding-left: 5%;
   padding-right: 5%;
   width: 90%;
@@ -45,14 +44,14 @@
   margin-top: auto;
   font-size: 1rem;
   color: #333333;
-  margin-bottom: 24px;
+  margin-bottom: auto;
   width: 90%;
   padding-left: 5%;
   padding-right: 5%;
 
   p {
     margin: 0;
-    line-height: 1.6;
+    font-size: 1.2rem;
   }
 }
 

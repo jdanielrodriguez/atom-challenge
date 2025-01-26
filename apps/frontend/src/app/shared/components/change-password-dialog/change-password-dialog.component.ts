@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
 import { AuthService } from '../../../core/services/auth.service';
+import { EncryptionService } from '../../../core/services/encryption.service';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -24,6 +25,7 @@ export class ChangePasswordDialogComponent implements OnInit {
     private fb: FormBuilder,
     private authService: AuthService,
     private snackBar: MatSnackBar,
+    private encryptionService: EncryptionService,
     private dialogRef: MatDialogRef<ChangePasswordDialogComponent>
   ) { }
 
@@ -68,8 +70,12 @@ export class ChangePasswordDialogComponent implements OnInit {
       this.snackBar.open('Las contraseñas no coinciden', 'Cerrar', { duration: 3000 });
       return;
     }
+
+    const encryptedCurrentPassword = this.encryptionService.encrypt(currentPassword);
+    const encryptedNewPassword = this.encryptionService.encrypt(newPassword);
+
     this.isLoading = true;
-    this.authService.changePassword(currentPassword, newPassword).subscribe({
+    this.authService.changePassword(encryptedCurrentPassword, encryptedNewPassword).subscribe({
       next: () => {
         this.snackBar.open('Contraseña actualizada.', 'Cerrar', { duration: 3000 });
         this.isLoading = false;

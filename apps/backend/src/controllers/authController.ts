@@ -3,6 +3,7 @@ import * as crypto from 'crypto';
 import { findUserByEmail, registerUser, loginUser, deleteUserByEmail, validateCurrentPassword, updateUserPassword, generateTokenForUser } from '../services/authService';
 import { User } from '../interfaces/user.interface';
 import emailService from '../services/emailService';
+import { decryptPassword } from './../services/encryptionService';
 
 export const checkEmail = async (req: Request, res: Response): Promise<void> => {
    try {
@@ -42,7 +43,8 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
 export const login = async (req: Request, res: Response): Promise<void> => {
    try {
-      const { email, password } = req.body;
+      const { email, password: encryptedNewPassword } = req.body;
+      const password = decryptPassword(encryptedNewPassword);
 
       const { user, token }: { user: User; token: string } = await loginUser(email, password);
 
@@ -54,7 +56,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
 export const changePassword = async (req: Request, res: Response): Promise<void> => {
    try {
-      const { currentPassword, newPassword } = req.body;
+      const { currentPassword: encryptedCurrentPassword, newPassword: encryptedNewPassword } = req.body;
 
       const email = (req as any).user.email;
 
@@ -63,16 +65,18 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
          return;
       }
 
-      if (!currentPassword || !newPassword) {
+      if (!encryptedCurrentPassword || !encryptedNewPassword) {
          res.status(400).json({ message: 'Current password and new password are required.' });
          return;
       }
+      const currentPassword = decryptPassword(encryptedCurrentPassword);
 
       const isValid = await validateCurrentPassword(email, currentPassword);
       if (!isValid) {
          res.status(401).json({ message: 'Current password is incorrect.' });
          return;
       }
+      const newPassword = decryptPassword(encryptedNewPassword);
 
       await updateUserPassword(email, newPassword);
 
@@ -97,6 +101,36 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
       });
    } catch (error: any) {
       res.status(500).json({ message: error.message });
+   }
+};
+
+export const resetPassword = async (req: Request, res: Response): Promise<void> => {
+   try {
+      const { email } = req.body;
+
+      if (!email) {
+         res.status(400).json({ message: 'El email es obligatorio.' });
+         return;
+      }
+
+      const user = await findUserByEmail(email);
+
+      if (!user) {
+         res.status(404).json({ message: 'Usuario no encontrado.' });
+         return;
+      }
+
+      const newPassword = crypto.randomBytes(10).toString('hex');
+      await updateUserPassword(email, newPassword);
+
+      await emailService.sendEmail(email, 'Recuperación de Contraseña', 'reset-password', {
+         email,
+         newPassword,
+      });
+
+      res.status(200).json({ message: 'Se ha enviado un correo con tu nueva contraseña.' });
+   } catch (error: any) {
+      res.status(500).json({ message: 'Error al restablecer la contraseña.', details: error.message });
    }
 };
 
