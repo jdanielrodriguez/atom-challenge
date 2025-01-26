@@ -1,0 +1,22 @@
+<div class="user-menu-container">
+  <button mat-fab color="primary" [matMenuTriggerFor]="menu" class="user-menu-button">
+    <mat-icon>list</mat-icon>
+  </button>
+
+  <mat-menu #menu="matMenu" class="user-menu">
+    <div class="menu-header">
+      <span class="menu-image">
+        <img [src]="userImage" alt="User Image" />
+      </span>
+      <span class="title">Usuario:</span>
+      <p>{{ userName || 'Usuario' }}</p>
+    </div>
+    <div class="menu-options">
+      <button mat-menu-item (click)="openChangePasswordDialog()">
+        <mat-icon>lock</mat-icon>
+        Cambiar Contraseña
+      </button>
+      <app-logout-button class="logout-button"></app-logout-button>
+    </div>
+  </mat-menu>
+</div>

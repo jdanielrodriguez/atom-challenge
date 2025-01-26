@@ -45,10 +45,11 @@ export class ApiInterceptor implements HttpInterceptor {
 
   private handleError(error: HttpErrorResponse): Observable<never> {
     if (error.status === 401 && error.error?.details.code === 'auth/id-token-expired') {
-      console.log(error)
       console.warn('Token expirado, cerrando sesión.');
       localStorage.removeItem('token');
-      this.router.navigate(['/auth/login']);
+      setTimeout(() => {
+        this.router.navigate(['/auth/login']);
+      }, 1000);
     } else if (error.status === 401) {
       console.error('Solicitud no autorizada:', error.message);
     } else {

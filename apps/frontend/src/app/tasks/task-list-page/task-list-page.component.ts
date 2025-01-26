@@ -11,12 +11,13 @@ import { Task, TaskStatus } from '../../interfaces/task.interface';
 import { TaskDetailPageComponent } from '../task-detail-page/task-detail-page.component';
 import { ConfirmDialogComponent, DEFAULT_DIALOG_CONFIG } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { LogoutButtonComponent } from '../../shared/components/logout-button/logout-button.component';
+import { UserMenuComponent } from '../../shared/components/user-menu-button/user-menu-button.component';
 
 
 @Component({
   selector: 'app-task-list-page',
   standalone: true,
-  imports: [MatTableModule, MatButtonModule, MatIconModule, CommonModule, LogoutButtonComponent, MatDividerModule, MatSelectModule],
+  imports: [MatTableModule, MatButtonModule, MatIconModule, CommonModule, UserMenuComponent, MatDividerModule, MatSelectModule, LogoutButtonComponent],
   templateUrl: './task-list-page.component.html',
   styleUrls: ['./task-list-page.component.scss'],
 })

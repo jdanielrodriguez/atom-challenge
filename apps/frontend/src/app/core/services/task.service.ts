@@ -21,7 +21,7 @@ export class TaskService {
     if (error.error instanceof ErrorEvent) {
       errorMessage = `Error: ${error.error.message}`;
     } else {
-      errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}`;
+      errorMessage = `Error Code: ${error.status || error}\nMessage: ${error.message}`;
     }
     return throwError(() => new Error(errorMessage));
   }

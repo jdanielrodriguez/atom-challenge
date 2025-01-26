@@ -4,6 +4,8 @@ import { Observable, BehaviorSubject, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import { FirebaseService } from './firebase.service';
 import { User } from '../../interfaces/user.interface';
+import { jwtDecode } from 'jwt-decode';
+
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -75,6 +77,34 @@ export class AuthService {
 
   isAuthenticated(): boolean {
     return this.isAuthenticatedSubject.getValue();
+  }
+
+  changePassword(currentPassword: string, newPassword: string): Observable<any> {
+    return this.http.post('/api/auth/change-password', { currentPassword, newPassword }).pipe(
+      tap((response: any) => this.processAuthentication(response.token)),
+      catchError((error) => {
+        console.error('Error actualizando la contraseña:', error);
+        return throwError(() => new Error('No se pudo actualizar la contraseña.'));
+      })
+    );
+  }
+
+  getDecodedToken(): any {
+    const token = this.getToken();
+    if (token) {
+      try {
+        return jwtDecode(token);
+      } catch (error) {
+        console.error('Error decoding token:', error);
+        return null;
+      }
+    }
+    return null;
+  }
+
+  getUserName(): string | null {
+    const decodedToken = this.getDecodedToken();
+    return decodedToken?.email || null;
   }
 
   private handleError(error: HttpErrorResponse): Observable<never> {

@@ -1,4 +1,62 @@
 @import "assets/styles/theme";
 
-html, body { height: 100%; }
-body { margin: 0; font-family: Inter, "Helvetica Neue", sans-serif; }
+html,
+body {
+  height: 100%;
+}
+body {
+  margin: 0;
+  font-family: Inter, "Helvetica Neue", sans-serif;
+}
+.user-menu {
+  width: auto;
+  min-width: 400px;
+
+  .menu-header {
+    display: block;
+    align-items: center;
+    text-align: center;
+    gap: 10%;
+    padding: 10%;
+    justify-content: center;
+
+    .menu-image img {
+      width: 40%;
+      height: 40%;
+      border-radius: 50%;
+    }
+    span.title {
+      width: 100%;
+      text-align: left;
+      display: block;
+    }
+    p {
+      font-weight: bold;
+      margin: 0;
+    }
+  }
+
+  .menu-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 8px;
+
+    button {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 8px;
+    }
+
+    app-logout-button {
+      margin-top: 16px;
+      display: flex;
+      justify-content: center;
+    }
+  }
+}
+app-user-menu-button {
+  position: relative;
+  top:1em;
+}
