@@ -36,6 +36,34 @@ Asegúrate de tener instalado lo siguiente en tu sistema:
 - Una cuenta de Google Cloud configurada para Firebase.
 
 ---
+## **Creación del Proyecto Firebase desde Cero**
+
+### **1. Crear el Proyecto en Google Cloud**
+
+1. Ve a Google Cloud Console: [`https://console.cloud.google.com/`](https://console.cloud.google.com/).
+2. Haz clic en **Seleccionar Proyecto** en la parte superior izquierda.
+3. Haz clic en **Nuevo Proyecto**.
+   - **Nombre del proyecto**: Ingresa un nombre como `atom-challenge`.
+   - **ID del proyecto**: Personaliza o utiliza el que se genere automáticamente.
+   - Haz clic en **Crear**.
+
+### **2. Habilitar APIs Necesarias**
+
+Habilita las siguientes APIs desde la biblioteca de APIs de Google Cloud:
+
+1. **Firebase Management API**: [`https://console.cloud.google.com/apis/library/firebase.googleapis.com`](https://console.cloud.google.com/apis/library/firebase.googleapis.com)
+2. **Cloud Firestore API**: [`https://console.cloud.google.com/apis/library/firestore.googleapis.com`](https://console.cloud.google.com/apis/library/firestore.googleapis.com)
+3. **Cloud Functions API** (si usas funciones): [`https://console.cloud.google.com/apis/library/cloudfunctions.googleapis.com`](https://console.cloud.google.com/apis/library/cloudfunctions.googleapis.com)
+
+### **3. Configurar Firebase**
+
+1. Ve a la consola de Firebase: [`https://console.firebase.google.com/`](https://console.firebase.google.com/).
+2. Selecciona el proyecto que creaste en Google Cloud.
+3. Configura las siguientes herramientas:
+   - **Authentication**: Ve a "Authentication" > "Métodos de Inicio de Sesión" y habilita el método de correo electrónico y contraseña.
+   - **Firestore**: Ve a "Firestore Database", haz clic en "Crear Base de Datos", selecciona el **modo de producción** y configura la región.
+
+---
 
 ## **Instalación**
 
@@ -53,7 +81,16 @@ Asegúrate de tener instalado lo siguiente en tu sistema:
    4. Haz clic en **Generar nueva clave privada**.
    5. Descarga el archivo JSON y guárdalo en `infra/firebase/service-account.json`.
 
-   > **Nota**: No subas este archivo al repositorio. Usa el ejemplo `service-account.json.example`.
+   6. Para las variables de entorno del backend y frontend, accede a la consola de Firebase y obtén los valores desde la sección "Configuración del Proyecto" > "Tus apps". Copia los siguientes valores para cada entorno:
+      - **API Key** (`FIREBASE_API_KEY` / `NG_APP_FIREBASE_API_KEY`).
+      - **Auth Domain** (`FIREBASE_AUTH_DOMAIN` / `NG_APP_FIREBASE_AUTH_DOMAIN`).
+      - **Project ID** (`FIREBASE_PROJECT_ID` / `NG_APP_FIREBASE_PROJECT_ID`).
+      - **Storage Bucket** (`FIREBASE_STORAGE_BUCKET` / `NG_APP_FIREBASE_STORAGE_BUCKET`).
+      - **Messaging Sender ID** (`FIREBASE_MESSAGING_SENDER_ID` / `NG_APP_FIREBASE_MESSAGING_SENDER_ID`).
+      - **App ID** (`FIREBASE_APP_ID` / `NG_APP_FIREBASE_APP_ID`).
+      - **Measurement ID** (`FIREBASE_MEASUREMENT_ID` / `NG_APP_FIREBASE_MEASUREMENT_ID`).
+
+   > **Nota**: No subas este archivo ni los valores de entorno sensibles al repositorio. Usa ejemplos como `service-account.json.example` y `.env.example`.
 
 3. **Configurar el Archivo `.env`**:
    Crea un archivo `.env` en `apps/backend/` basado en el ejemplo proporcionado (`.env.example`):
