@@ -3,9 +3,8 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, BehaviorSubject, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import { FirebaseService } from './firebase.service';
-import { User } from '../../interfaces/user.interface';
 import { jwtDecode } from 'jwt-decode';
-
+import { User } from '../../interfaces/user.interface';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -23,8 +22,7 @@ export class AuthService {
       localStorage.setItem('token', token);
       this.isAuthenticatedSubject.next(true);
     } else {
-      localStorage.removeItem('token');
-      this.isAuthenticatedSubject.next(false);
+      this.cleanUpSession();
     }
   }
 
@@ -56,17 +54,14 @@ export class AuthService {
 
   logout(): Observable<any> {
     return this.http.post('/api/auth/logout', {}).pipe(
-      tap(() => {
-        this.isAuthenticatedSubject.next(false);
-        localStorage.removeItem('token');
-      }),
-      catchError((error) => {
-        console.error('Error cerrando sesión:', error);
-        this.isAuthenticatedSubject.next(false);
-        localStorage.removeItem('token');
-        return throwError(() => new Error(error.message));
-      })
+      tap(() => this.cleanUpSession()),
+      catchError(this.handleError)
     );
+  }
+
+  cleanUpSession(): void {
+    localStorage.removeItem('token');
+    this.isAuthenticatedSubject.next(false);
   }
 
   setToken(token: string): void {
@@ -84,24 +79,18 @@ export class AuthService {
   changePassword(currentPassword: string, newPassword: string): Observable<any> {
     return this.http.post('/api/auth/change-password', { currentPassword, newPassword }).pipe(
       tap((response: any) => this.processAuthentication(response.token)),
-      catchError((error) => {
-        console.error('Error actualizando la contraseña:', error);
-        return throwError(() => new Error('No se pudo actualizar la contraseña.'));
-      })
+      catchError(this.handleError)
     );
   }
 
   getDecodedToken(): any {
     const token = this.getToken();
-    if (token) {
-      try {
-        return jwtDecode(token);
-      } catch (error) {
-        console.error('Error decoding token:', error);
-        return null;
-      }
+    try {
+      return token ? jwtDecode(token) : null;
+    } catch (error) {
+      console.error('Error decoding token:', error);
+      return null;
     }
-    return null;
   }
 
   getUserName(): string | null {
@@ -110,12 +99,11 @@ export class AuthService {
   }
 
   private handleError(error: HttpErrorResponse): Observable<never> {
-    let errorMessage = 'An unknown error occurred.';
-    if (error.error instanceof ErrorEvent) {
-      errorMessage = `Error: ${error.error.message}`;
-    } else {
-      errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}`;
-    }
+    const errorMessage =
+      error.error instanceof ErrorEvent
+        ? `Error: ${error.error.message}`
+        : `Error Code: ${error.status}\nMessage: ${error.message}`;
+
     return throwError(() => new Error(errorMessage));
   }
 }

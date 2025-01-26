@@ -7,7 +7,7 @@ import {
   HttpErrorResponse,
 } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, switchMap, tap } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
@@ -22,22 +22,18 @@ export class ApiInterceptor implements HttpInterceptor {
     const fullUrl = req.url.startsWith('http') ? req.url : `${this.baseUrl}${req.url}`;
 
     if (this.isWhitelisted(fullUrl)) {
-      const apiReq = req.clone({ url: fullUrl });
-      return next.handle(apiReq).pipe(catchError((error) => this.handleError(error)));
+      return next.handle(req.clone({ url: fullUrl })).pipe(catchError((error) => this.handleError(error)));
     }
 
     const token = this.authService.getToken();
-    if (token) {
-      const authReq = req.clone({
+    const authReq = token
+      ? req.clone({
         url: fullUrl,
         setHeaders: { Authorization: `Bearer ${token}` },
-      });
-      return next.handle(authReq).pipe(catchError((error) => this.handleError(error)));
-    } else {
-      console.warn('No se encontró token para solicitud segura.');
-    }
+      })
+      : req.clone({ url: fullUrl });
 
-    return next.handle(req.clone({ url: fullUrl })).pipe(catchError((error) => this.handleError(error)));
+    return next.handle(authReq).pipe(catchError((error) => this.handleError(error)));
   }
 
   private isWhitelisted(url: string): boolean {
@@ -45,18 +41,25 @@ export class ApiInterceptor implements HttpInterceptor {
   }
 
   private handleError(error: HttpErrorResponse): Observable<never> {
-    if (error.status === 401 && error.error?.details.code === 'auth/id-token-expired') {
+    if (error.status === 401 && error.error?.details?.code === 'auth/id-token-expired') {
       console.warn('Token expirado, cerrando sesión.');
-      this.authService.logout().subscribe({
-        next: () => {
-          this.router.navigate(['/auth/login']);
-        },
-      });
-    } else if (error.status === 401) {
+      return this.authService.logout().pipe(
+        tap(() => this.router.navigate(['/auth/login'])),
+        catchError((err) => {
+          console.error('Error cerrando sesión:', err);
+          this.authService.cleanUpSession();
+          return throwError(() => new Error(err.message));
+        }),
+        switchMap(() => throwError(() => new Error('Token expirado')))
+      );
+    }
+
+    if (error.status === 401) {
       console.error('Solicitud no autorizada:', error.message);
     } else {
       console.error('Error en la solicitud:', error.message);
     }
+
     return throwError(() => new Error(error.message));
   }
 }

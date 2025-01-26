@@ -48,7 +48,6 @@ export class TaskFormComponent implements OnInit {
     if (this.task) {
       this.taskForm.patchValue(this.task);
     }
-    console.log(this.taskForm)
   }
 
   onSubmit(): void {
