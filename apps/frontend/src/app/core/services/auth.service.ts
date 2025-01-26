@@ -65,7 +65,6 @@ export class AuthService {
     );
   }
 
-
   cleanUpSession(): void {
     localStorage.removeItem('token');
     this.isAuthenticatedSubject.next(false);
