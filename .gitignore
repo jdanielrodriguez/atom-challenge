@@ -8,3 +8,5 @@
 *dist
 apps/frontend/src/environments/environment.ts
 *.pem
+*google-cloud*
+google-cloud-cli*
