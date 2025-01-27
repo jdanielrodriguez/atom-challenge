@@ -5,8 +5,9 @@ services:
     build:
       context: ../apps/backend
       dockerfile: ../../infra/docker/backend/Dockerfile.prod
-    env_file:
-      - ../apps/backend/.env.prod
+    volumes:
+      - ../infra/firebase/service-account.json:/app/service-account.json
+      - ../apps/backend/.env.prod:/app/.env.prod
     ports:
       - "3000:3000"
     environment:
