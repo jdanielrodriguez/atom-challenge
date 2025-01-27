@@ -9,6 +9,7 @@ import { MatInputModule } from '@angular/material/input';
 import { CommonModule } from '@angular/common';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 
 @Component({
   selector: 'app-change-password-dialog',
@@ -26,11 +27,23 @@ export class ChangePasswordDialogComponent implements OnInit {
     private authService: AuthService,
     private snackBar: MatSnackBar,
     private encryptionService: EncryptionService,
-    private dialogRef: MatDialogRef<ChangePasswordDialogComponent>
+    private dialogRef: MatDialogRef<ChangePasswordDialogComponent>,
+    private breakpointObserver: BreakpointObserver
   ) { }
 
   ngOnInit(): void {
     this.initForm();
+    this.breakpointObserver.observe([Breakpoints.Handset]).subscribe((result) => {
+      if (result.matches) {
+        this.adjustForMobile('80%', '50%');
+      } else {
+        this.adjustForMobile('50%', '50%');
+      }
+    });
+  }
+
+  private adjustForMobile(width: string, height: string): void {
+    this.dialogRef.updateSize(width, height);
   }
 
   private initForm(): void {

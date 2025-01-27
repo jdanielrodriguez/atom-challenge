@@ -4,6 +4,7 @@ import { TaskService } from '../../core/services/task.service';
 import { Task, TaskStatus } from '../../interfaces/task.interface';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TaskFormComponent } from '../task-form/task-form.component';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 
 @Component({
   selector: 'app-task-detail-page',
@@ -23,13 +24,26 @@ export class TaskDetailPageComponent implements OnInit {
     private taskService: TaskService,
     private snackBar: MatSnackBar,
     private dialogRef: MatDialogRef<TaskDetailPageComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { task: Task | null; readonly: boolean }
+    @Inject(MAT_DIALOG_DATA) public data: { task: Task | null; readonly: boolean },
+    private breakpointObserver: BreakpointObserver
+
   ) { }
 
   ngOnInit(): void {
     this.isReadonly = this.data?.readonly || false;
     this.task = this.data?.task || null;
     this.isEditMode = !!this.task?.id;
+    this.breakpointObserver.observe([Breakpoints.Handset]).subscribe((result) => {
+      if (result.matches) {
+        this.adjustForMobile('80%', '60%');
+      } else {
+        this.adjustForMobile('40%', '60%');
+      }
+    });
+  }
+
+  private adjustForMobile(width: string, height: string): void {
+    this.dialogRef.updateSize(width, height);
   }
 
   onSave(task: Task): void {
