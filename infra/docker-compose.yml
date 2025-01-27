@@ -27,7 +27,7 @@ services:
       atom_challenge_network:
         ipv4_address: 192.168.100.3
     environment:
-      - NODE_ENV=development
+      - NG_APP_ENV=development
 
   atom_challenge_backend:
     container_name: atom_challenge_backend

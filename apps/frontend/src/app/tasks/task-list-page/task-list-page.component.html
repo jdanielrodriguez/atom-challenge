@@ -6,51 +6,56 @@
   <h1>Lista de Tareas</h1>
 
   <!-- Tabla de tareas -->
-  <table mat-table [dataSource]="tasks" class="mat-elevation-z8">
-    <ng-container matColumnDef="title">
-      <th mat-header-cell *matHeaderCellDef>Título</th>
-      <td mat-cell *matCellDef="let task">{{ task.title }}</td>
-    </ng-container>
+  <div class="table-responsive">
+    <table mat-table [dataSource]="tasks" class="mat-elevation-z8">
+      <ng-container matColumnDef="title">
+        <th mat-header-cell *matHeaderCellDef>Título</th>
+        <td mat-cell *matCellDef="let task">{{ task.title }}</td>
+      </ng-container>
 
-    <ng-container matColumnDef="createdAt">
-      <th mat-header-cell *matHeaderCellDef>Creado</th>
-      <td mat-cell *matCellDef="let task">{{ task.createdAt | date: 'short' }}</td>
-    </ng-container>
+      <ng-container matColumnDef="createdAt">
+        <th mat-header-cell *matHeaderCellDef>Creado</th>
+        <td mat-cell *matCellDef="let task">{{ task.createdAt | date: 'short' }}</td>
+      </ng-container>
 
-    <ng-container matColumnDef="status">
-      <th mat-header-cell *matHeaderCellDef>Estado</th>
-      <td mat-cell *matCellDef="let task">
-        <mat-select [value]="task.status" (selectionChange)="onStatusChange(task, $event.value)">
-          <mat-option [value]="task.status" disabled>
-            Estado actual: <span class="mat-option-content">{{ task.status }}</span>
-          </mat-option>
-          <mat-divider></mat-divider>
-          <mat-option *ngFor="let status of getFilteredStatuses(task.status)" [value]="status">
-            Cambiar a: <span class="mat-option-content">{{ status }}</span>
-          </mat-option>
-        </mat-select>
-      </td>
-    </ng-container>
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Estado</th>
+        <td mat-cell *matCellDef="let task">
+          <mat-select [value]="task.status" (selectionChange)="onStatusChange(task, $event.value)">
+            <mat-option [value]="task.status" disabled>
+              Estado actual: <br> <span class="mat-option-content">{{ task.status }}</span>
+            </mat-option>
+            <mat-divider></mat-divider>
+            <mat-option *ngFor="let status of getFilteredStatuses(task.status)" [value]="status">
+              Cambiar a: <br> <span class="mat-option-content">{{ status }}</span>
+            </mat-option>
+          </mat-select>
+        </td>
+      </ng-container>
 
-    <ng-container matColumnDef="options">
-      <th mat-header-cell *matHeaderCellDef>Opciones</th>
-      <td mat-cell *matCellDef="let task">
-        <button mat-icon-button color="info" (click)="editTask(task)">
-          <mat-icon>edit</mat-icon>
-        </button>
-        <button mat-icon-button color="warn" (click)="deleteTask(task)">
-          <mat-icon>delete</mat-icon>
-        </button>
-      </td>
-    </ng-container>
+      <ng-container matColumnDef="options">
+        <th mat-header-cell *matHeaderCellDef>Opciones</th>
+        <td mat-cell *matCellDef="let task">
+          <button mat-icon-button color="info" (click)="editTask(task)">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button color="warn" (click)="deleteTask(task)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
 
-    <!-- Encabezado y filas -->
-    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-  </table>
-
+      <!-- Encabezado y filas -->
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  </div>
   <!-- Botón flotante para agregar tareas -->
   <button mat-fab color="primary" class="add-task-button" (click)="addTask()">
     <mat-icon>add</mat-icon>
+  </button>
+
+  <button mat-button class="created-by-button" (click)="openPersonalInfoDialog()">
+    Creado por <mat-icon>person</mat-icon>
   </button>
 </div>

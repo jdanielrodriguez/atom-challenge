@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ConfirmDialogComponent, DEFAULT_DIALOG_CONFIG } from '../../shared/components/confirm-dialog/confirm-dialog.component';
+import { PersonalInfoDialogComponent } from '../../shared/components/personal-info-dialog/personal-info-dialog.component';
 import { AuthService } from '../../core/services/auth.service';
 import { EncryptionService } from '../../core/services/encryption.service';
 import { finalize } from 'rxjs';
@@ -10,6 +11,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { NgIf } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
 @Component({
   selector: 'app-login-page',
   standalone: true,
@@ -22,6 +24,7 @@ import { NgIf } from '@angular/common';
     ReactiveFormsModule,
     NgIf,
     MatDialogModule,
+    MatIconModule,
   ],
 })
 export class LoginPageComponent {
@@ -213,6 +216,11 @@ export class LoginPageComponent {
           },
         });
       },
+    });
+  }
+  openPersonalInfoDialog(): void {
+    this.dialog.open(PersonalInfoDialogComponent, {
+      ...DEFAULT_DIALOG_CONFIG,
     });
   }
 }

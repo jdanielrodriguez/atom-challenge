@@ -6,5 +6,9 @@
   .user-menu-button {
     width: 4rem;
     height: 4rem;
+    @media (max-width: 850px) {
+      width: 3.5em;
+      height: 3.5em;
+    }
   }
 }

@@ -1,10 +1,14 @@
 .task-list-container {
   display: flex;
   flex-direction: column;
-  align-items: left;
   padding: 2%;
   max-width: 1200px;
   margin: 0 auto;
+
+  @media (max-width: 850px) {
+    width: 90%;
+    padding: 5%;
+  }
 
   h1 {
     text-align: center;
@@ -12,17 +16,55 @@
     margin: 16px 0 24px;
   }
 
-  table {
-    width: 100%;
-    max-width: 1000px;
-    margin: 24px 0;
-    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 24px;
+
+    table {
+      width: 100%;
+      min-width: 1000px;
+      margin: 16px 0;
+      box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+
+      @media (max-width: 850px) {
+        min-width: 200px;
+        margin: 10px 0;
+      }
+
+      th,
+      td {
+        max-width: 200px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+
+        @media (max-width: 850px) {
+          max-width: 150px;
+        }
+      }
+
+      th {
+        text-align: left;
+        font-weight: bold;
+        font-size: 1rem;
+      }
+
+      td {
+        text-align: left;
+        padding: 8px 16px;
+
+        @media (max-width: 850px) {
+          padding: 4px 8px;
+        }
+      }
+    }
   }
 
   .add-task-button {
     position: fixed;
-    bottom: 16px;
-    right: 16px;
+    bottom: 24px;
+    right: 24px;
     z-index: 1000;
   }
 
@@ -38,11 +80,33 @@
     }
   }
 
+  .created-by-button {
+    background: none;
+    color: #3f51b5;
+    font-size: 0.875rem;
+    text-decoration: none;
+    position: fixed;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    bottom: 24px;
+    left: 24px;
+    mat-icon {
+      font-size: 1.2rem;
+    }
+
+    &:hover {
+      color: #303f9f;
+      background: none;
+    }
+  }
+
   button {
     text-transform: uppercase;
     font-weight: bold;
   }
 }
+
 mat-select {
   width: 100%;
 
@@ -62,6 +126,7 @@ mat-select {
     color: #888;
   }
 }
+
 .mat-option-content {
   font-weight: bold;
 }

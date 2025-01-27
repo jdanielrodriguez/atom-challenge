@@ -11,6 +11,7 @@
   align-items: center;
   gap: 16px;
 }
+
 .close-button {
   background-color: transparent;
   color: #333333;
@@ -28,6 +29,7 @@
     color: #f44336;
   }
 }
+
 .dialog-header {
   display: flex;
   justify-content: center;
@@ -63,6 +65,11 @@
   width: 90%;
   padding-left: 5%;
   padding-right: 5%;
+
+  @media (max-width: 850px) {
+    flex-direction: column-reverse;
+    gap: 12px;
+  }
 
   button {
     flex: 1;

@@ -2,11 +2,15 @@
 
 html,
 body {
-  height: 100%;
-}
-body {
+  height: 100vh;
   margin: 0;
   font-family: Inter, "Helvetica Neue", sans-serif;
+  height: 100%;
+  width: 100%;
+  @media (max-width: 850px) {
+    height: 100vh;
+    width: 100vw;
+  }
 }
 .user-menu {
   width: auto;
