@@ -37,7 +37,7 @@ export class TaskDetailPageComponent implements OnInit {
       if (result.matches) {
         this.adjustForMobile('80%', '60%');
       } else {
-        this.adjustForMobile('40%', '60%');
+        this.adjustForMobile('40%', '75%');
       }
     });
   }
