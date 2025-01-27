@@ -7,13 +7,14 @@ import {
   HttpErrorResponse,
 } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError, switchMap, tap } from 'rxjs/operators';
+import { catchError } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
+import { environment } from '../../../environments/environment';
 
 @Injectable()
 export class ApiInterceptor implements HttpInterceptor {
-  private readonly baseUrl = 'http://localhost:3000';
+  private readonly baseUrl = environment.backendEndpoint || 'http://localhost:3000';
   private readonly whitelist = ['/auth/login', '/auth/register'];
 
   constructor(private router: Router, private authService: AuthService) { }

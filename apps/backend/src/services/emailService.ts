@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 const createTransporter = () => {
-   if (process.env.NODE_ENV !== 'prod') {
+   if (process.env.NODE_ENV !== 'production') {
       return nodemailer.createTransport({
          host: process.env.MAIL_HOST || 'localhost',
          port: parseInt(process.env.MAIL_PORT || '1025'),
