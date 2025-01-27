@@ -25,6 +25,7 @@ export class PersonalInfoDialogComponent implements OnInit {
   private adjustForMobile(width: string, height: string): void {
     this.dialogRef.updateSize(width, height);
   }
+
   closeDialog(): void {
     this.dialogRef.close();
   }
