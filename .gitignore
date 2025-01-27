@@ -3,6 +3,7 @@
 /infra/firebase/*debug*
 *node_modules*
 *.env
+*.env.prod
 *.vscode
 /apps/backend/service-account.json
 *dist
@@ -10,3 +11,4 @@ apps/frontend/src/environments/environment.ts
 *.pem
 *google-cloud*
 google-cloud-cli*
+*.firebase

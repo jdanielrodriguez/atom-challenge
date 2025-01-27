@@ -1,0 +1,31 @@
+services:
+  atom_challenge_backend_prod:
+    container_name: atom_challenge_backend_prod
+    image: gcr.io/atom-challenge-bdcd0/backend
+    build:
+      context: ../apps/backend
+      dockerfile: ../../infra/docker/backend/Dockerfile.prod
+    env_file:
+      - ../apps/backend/.env.prod
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      GOOGLE_APPLICATION_CREDENTIALS: /app/service-account.json
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+  atom_challenge_firebase_prod:
+    container_name: atom_challenge_firebase_prod
+    image: atom_challenge_firebase
+    build:
+      context: ../infra
+      dockerfile: docker/firebase/Dockerfile
+    ports:
+      - "4000:4000"
+      - "8080:8080"
+      - "9099:9099"
+    environment:
+      NODE_ENV: production
+      GOOGLE_APPLICATION_CREDENTIALS: /app/service-account.json

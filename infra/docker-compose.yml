@@ -57,6 +57,7 @@ services:
       - atom_challenge_firebase_volume:/firebase/data
       - ../infra/firebase:/firebase/config
       - ../infra/firebase/service-account.json:/root/.config/firebase/service-account.json
+      - ../apps/frontend/dist:/firebase/config/hosting
     ports:
       - "4400:4400"
       - "8080:8080"

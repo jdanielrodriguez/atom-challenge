@@ -28,3 +28,9 @@ down:
 clean: down
 	docker volume rm atom_challenge_firebase_volume || true
 	docker network rm $(NETWORK) || true
+
+build-dev:
+	docker-compose -f infra/docker-compose.yml up --build
+
+build-prod:
+	docker-compose -f infra/docker-compose.prod.yml up --build
