@@ -6,16 +6,45 @@ export const getTasks = async (req: Request, res: Response): Promise<void> => {
    try {
       const db = FirebaseService.getFirestore();
       const userId = (req as any).user.id;
-      const userTasksSnapshot = await db.collection('tasks')
+
+      const { status, search, page = 1, pageSize = 50, startDate, endDate } = req.query;
+
+      let query = db.collection('tasks')
          .where('userId', '==', userId)
-         .orderBy('createdAt', 'desc')
-         .get();
+         .orderBy('createdAt', 'desc');
 
-      const tasks = userTasksSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      if (status) {
+         query = query.where('status', '==', status);
+      }
 
-      res.status(200).json(tasks);
+      if (search) {
+         query = query.where('title', '>=', search).where('title', '<=', search + '\uf8ff');
+      }
+
+      if (startDate && endDate) {
+         const { start, end } = FirebaseService.formatDateRangeToTimestamps(
+            startDate as string,
+            endDate as string
+         );
+
+         query = query.where('createdAt', '>=', start.toMillis()).where('createdAt', '<=', end.toMillis());
+      }
+
+
+      const snapshot = await query.get();
+
+      const tasks = snapshot.docs.map((doc) => ({
+         id: doc.id,
+         ...doc.data(),
+      })) as Task[];
+
+      const total = tasks.length;
+      const paginatedTasks = tasks.slice((+page - 1) * +pageSize, +page * +pageSize);
+
+      res.status(200).json({ tasks: paginatedTasks, total });
    } catch (error) {
-      res.status(500).json({ error: 'Failed to fetch tasks' + error });
+      console.error('Error fetching tasks:', error);
+      res.status(500).json({ error: 'Failed to fetch tasks' });
    }
 };
 

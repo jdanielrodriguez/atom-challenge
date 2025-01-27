@@ -59,8 +59,21 @@ class FirebaseService {
       await this.auth.deleteUser(uid);
    }
 
-   formatTimestamp(date: Date) {
+   formatTimestamp(date: Date): admin.firestore.Timestamp {
       return admin.firestore.Timestamp.fromDate(date);
+   }
+
+   formatDateRangeToTimestamps(startDateString: string, endDateString: string): { start: admin.firestore.Timestamp; end: admin.firestore.Timestamp } {
+      const start = new Date(startDateString);
+      const end = new Date(endDateString);
+
+      start.setUTCHours(0, 0, 0, 0);
+      end.setUTCHours(23, 59, 59, 999);
+
+      return {
+         start: this.formatTimestamp(start),
+         end: this.formatTimestamp(end),
+      };
    }
 
    updateUserPassword = async (uid: string, newPassword: string): Promise<void> => {

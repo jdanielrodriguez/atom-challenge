@@ -1,11 +1,34 @@
 <div class="task-list-container">
-  <!-- Botón de cerrar sesión -->
   <app-user-menu-button></app-user-menu-button>
 
-  <!-- Encabezado -->
   <h1>Lista de Tareas</h1>
 
-  <!-- Tabla de tareas -->
+  <div class="filters" [formGroup]="filtersForm">
+    <mat-form-field appearance="outline">
+      <mat-label>Estado</mat-label>
+      <mat-select formControlName="status">
+        <mat-option value="">Todos</mat-option>
+        <mat-option *ngFor="let status of statuses" [value]="status">{{ status }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Buscar por título</mat-label>
+      <input matInput formControlName="search" placeholder="Buscar tareas..." />
+    </mat-form-field>
+
+
+    <div class="filter-buttons">
+      <button mat-raised-button color="primary" (click)="applyFilters()">
+        <mat-icon>search</mat-icon>
+
+      </button>
+      <button mat-raised-button color="warn" (click)="clearFilters()">
+        <mat-icon>cancel</mat-icon>
+      </button>
+    </div>
+  </div>
+
   <div class="table-responsive">
     <table mat-table [dataSource]="tasks" class="mat-elevation-z8">
       <ng-container matColumnDef="title">
@@ -45,12 +68,15 @@
         </td>
       </ng-container>
 
-      <!-- Encabezado y filas -->
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
     </table>
   </div>
-  <!-- Botón flotante para agregar tareas -->
+
+  <mat-paginator [length]="totalTasks" [pageSize]="pageSize" [pageSizeOptions]="[10, 25, 50]"
+    (page)="onPageChange($event)">
+  </mat-paginator>
+
   <button mat-fab color="primary" class="add-task-button" (click)="addTask()">
     <mat-icon>add</mat-icon>
   </button>
