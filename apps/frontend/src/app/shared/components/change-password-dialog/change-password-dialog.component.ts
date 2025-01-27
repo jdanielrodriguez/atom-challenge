@@ -35,7 +35,7 @@ export class ChangePasswordDialogComponent implements OnInit {
     this.initForm();
     this.breakpointObserver.observe([Breakpoints.Handset]).subscribe((result) => {
       if (result.matches) {
-        this.adjustForMobile('80%', '75%');
+        this.adjustForMobile('80%', '65%');
       } else {
         this.adjustForMobile('50%', '50%');
       }

@@ -35,7 +35,7 @@ export class TaskDetailPageComponent implements OnInit {
     this.isEditMode = !!this.task?.id;
     this.breakpointObserver.observe([Breakpoints.Handset]).subscribe((result) => {
       if (result.matches) {
-        this.adjustForMobile('80%', '85%');
+        this.adjustForMobile('80%', '75%');
       } else {
         this.adjustForMobile('40%', '60%');
       }
