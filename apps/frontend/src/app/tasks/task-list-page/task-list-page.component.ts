@@ -10,6 +10,7 @@ import { TaskService } from '../../core/services/task.service';
 import { Task, TaskStatus } from '../../interfaces/task.interface';
 import { TaskDetailPageComponent } from '../task-detail-page/task-detail-page.component';
 import { ConfirmDialogComponent, DEFAULT_DIALOG_CONFIG } from '../../shared/components/confirm-dialog/confirm-dialog.component';
+import { PersonalInfoDialogComponent } from '../../shared/components/personal-info-dialog/personal-info-dialog.component';
 import { LogoutButtonComponent } from '../../shared/components/logout-button/logout-button.component';
 import { UserMenuComponent } from '../../shared/components/user-menu-button/user-menu-button.component';
 
@@ -17,7 +18,17 @@ import { UserMenuComponent } from '../../shared/components/user-menu-button/user
 @Component({
   selector: 'app-task-list-page',
   standalone: true,
-  imports: [MatTableModule, MatButtonModule, MatIconModule, CommonModule, UserMenuComponent, MatDividerModule, MatSelectModule, LogoutButtonComponent],
+  imports: [
+    MatTableModule,
+    MatButtonModule,
+    MatIconModule,
+    CommonModule,
+    UserMenuComponent,
+    MatDividerModule,
+    MatSelectModule,
+    LogoutButtonComponent,
+    PersonalInfoDialogComponent
+  ],
   templateUrl: './task-list-page.component.html',
   styleUrls: ['./task-list-page.component.scss'],
 })
@@ -133,6 +144,12 @@ export class TaskListPageComponent {
           error: (err) => console.error('Error al eliminar la tarea:', err),
         });
       }
+    });
+  }
+
+  openPersonalInfoDialog(): void {
+    this.dialog.open(PersonalInfoDialogComponent, {
+      ...DEFAULT_DIALOG_CONFIG,
     });
   }
 }
