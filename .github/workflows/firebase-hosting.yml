@@ -10,28 +10,34 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '18'
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
 
-    - name: Install dependencies
-      run: |
-        cd apps/frontend
-        yarn install
+      - name: Install dependencies
+        run: |
+          cd apps/frontend
+          yarn install
 
-    - name: Build frontend
-      run: |
-        cd apps/frontend
-        yarn build
+      - name: Build frontend
+        run: |
+          cd apps/frontend
+          yarn build
 
-    - name: Deploy to Firebase
-      env:
-        FIREBASE_TOKEN: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-        FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
-      run: |
-        npm install -g firebase-tools
-        firebase deploy --only hosting --token "$FIREBASE_TOKEN"
+      - name: Move firebase.json to build directory
+        run: |
+          cp infra/firebase/firebase.json apps/frontend/dist/
+
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+
+      - name: Deploy to Firebase
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          cd apps/frontend/dist
+          firebase deploy --only hosting --token "$FIREBASE_TOKEN"
