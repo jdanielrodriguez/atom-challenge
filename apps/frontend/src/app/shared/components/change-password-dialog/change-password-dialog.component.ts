@@ -37,7 +37,7 @@ export class ChangePasswordDialogComponent implements OnInit {
       if (result.matches) {
         this.adjustForMobile('80%', '50%');
       } else {
-        this.adjustForMobile('50%', '50%');
+        this.adjustForMobile('50%', '75%');
       }
     });
   }
