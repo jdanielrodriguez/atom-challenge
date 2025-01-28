@@ -2,6 +2,7 @@ import * as admin from 'firebase-admin';
 export interface Task {
    id?: string;
    title?: string;
+   titleLower?: string;
    description?: string;
    createdAt: Date | admin.firestore.Timestamp;
    updatedAt?: Date | admin.firestore.Timestamp;

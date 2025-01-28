@@ -127,6 +127,7 @@ export class TaskListPageComponent implements OnInit {
 
   clearFilters(): void {
     this.filtersForm.reset();
+    this.filtersForm.get('status')?.setValue('');
     this.page = 1;
     this.fetchTasks();
   }
