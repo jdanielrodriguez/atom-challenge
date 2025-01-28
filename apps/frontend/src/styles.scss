@@ -64,3 +64,7 @@ app-user-menu-button {
   position: relative;
   top:1em;
 }
+
+.filters mat-form-field .mat-mdc-form-field-subscript-wrapper {
+  display: none;
+}

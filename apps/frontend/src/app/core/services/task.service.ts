@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 import { Task } from '../../interfaces/task.interface';
@@ -56,10 +56,19 @@ export class TaskService {
     });
   }
 
-  getTasks(): Observable<Task[]> {
-    return this.http.get<Task[]>(this.apiUrl).pipe(
-      map(tasks => this.transformTasksDates(tasks)),
-      tap(transformedTasks => this.tasksSubject.next(transformedTasks)),
+  getTasks(params: any): Observable<{ tasks: Task[]; total: number }> {
+    let httpParams = new HttpParams();
+    Object.keys(params).forEach((key) => {
+      if (params[key]) {
+        httpParams = httpParams.set(key, params[key]);
+      }
+    });
+    return this.http.get<{ tasks: Task[]; total: number }>(this.apiUrl, { params: httpParams }).pipe(
+      map(response => {
+        response.tasks = this.transformTasksDates(response.tasks);
+        return response;
+      }),
+      tap(response => this.tasksSubject.next(response.tasks)),
       catchError(this.handleError)
     );
   }

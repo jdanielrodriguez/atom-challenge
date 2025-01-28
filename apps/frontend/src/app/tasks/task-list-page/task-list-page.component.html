@@ -1,11 +1,43 @@
 <div class="task-list-container">
-  <!-- Botón de cerrar sesión -->
   <app-user-menu-button></app-user-menu-button>
 
-  <!-- Encabezado -->
   <h1>Lista de Tareas</h1>
 
-  <!-- Tabla de tareas -->
+  <div class="filters" [formGroup]="filtersForm">
+    <mat-form-field appearance="outline">
+      <mat-label>Estado</mat-label>
+      <mat-select formControlName="status">
+        <mat-option value="">Todos</mat-option>
+        <mat-option *ngFor="let status of statuses" [value]="status">{{ status }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Buscar por título</mat-label>
+      <input matInput formControlName="search" placeholder="Buscar tareas..." (keydown.enter)="applyFilters()" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="date-range-picker" formGroupName="dateRange">
+      <mat-label>Rango de fechas</mat-label>
+      <mat-date-range-input [rangePicker]="datePicker">
+        <input matStartDate formControlName="startDate" placeholder="Fecha inicial" />
+        <input matEndDate formControlName="endDate" placeholder="Fecha final" />
+      </mat-date-range-input>
+      <mat-datepicker-toggle matSuffix [for]="datePicker"></mat-datepicker-toggle>
+      <mat-date-range-picker #datePicker></mat-date-range-picker>
+    </mat-form-field>
+
+    <div class="filter-buttons">
+      <button mat-raised-button color="primary" (click)="applyFilters()" title="Buscar">
+        <mat-icon>search</mat-icon>
+
+      </button>
+      <button mat-raised-button color="warn" (click)="clearFilters()" title="Limpiar filtros">
+        <mat-icon>filter_alt_off</mat-icon>
+      </button>
+    </div>
+  </div>
+
   <div class="table-responsive">
     <table mat-table [dataSource]="tasks" class="mat-elevation-z8">
       <ng-container matColumnDef="title">
@@ -26,9 +58,12 @@
               Estado actual: <br> <span class="mat-option-content">{{ task.status }}</span>
             </mat-option>
             <mat-divider></mat-divider>
-            <mat-option *ngFor="let status of getFilteredStatuses(task.status)" [value]="status">
-              Cambiar a: <br> <span class="mat-option-content">{{ status }}</span>
-            </mat-option>
+            <ng-container *ngIf="getFilteredStatuses(task.status).length">
+              <mat-option disabled class="option-label">Cambiar a:</mat-option>
+              <mat-option *ngFor="let status of getFilteredStatuses(task.status)" [value]="status">
+                <span class="mat-option-content">{{ status }}</span>
+              </mat-option>
+            </ng-container>
           </mat-select>
         </td>
       </ng-container>
@@ -45,17 +80,20 @@
         </td>
       </ng-container>
 
-      <!-- Encabezado y filas -->
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
     </table>
   </div>
-  <!-- Botón flotante para agregar tareas -->
+
+  <mat-paginator [length]="totalTasks" [pageSize]="pageSize" [pageSizeOptions]="[10, 25, 50]"
+    (page)="onPageChange($event)">
+  </mat-paginator>
+
   <button mat-fab color="primary" class="add-task-button" (click)="addTask()">
     <mat-icon>add</mat-icon>
   </button>
 
   <button mat-button class="created-by-button" (click)="openPersonalInfoDialog()">
-    Creado por <mat-icon>person</mat-icon>
+    Autor <mat-icon>person</mat-icon>
   </button>
 </div>

@@ -1,10 +1,17 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { MAT_MOMENT_DATE_ADAPTER_OPTIONS, MomentDateAdapter, MAT_MOMENT_DATE_FORMATS } from '@angular/material-moment-adapter';
+import { MAT_DATE_LOCALE, DateAdapter, MAT_DATE_FORMATS } from '@angular/material/core';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSelectModule } from '@angular/material/select';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { TaskService } from '../../core/services/task.service';
 import { Task, TaskStatus } from '../../interfaces/task.interface';
@@ -13,7 +20,7 @@ import { ConfirmDialogComponent, DEFAULT_DIALOG_CONFIG } from '../../shared/comp
 import { PersonalInfoDialogComponent } from '../../shared/components/personal-info-dialog/personal-info-dialog.component';
 import { LogoutButtonComponent } from '../../shared/components/logout-button/logout-button.component';
 import { UserMenuComponent } from '../../shared/components/user-menu-button/user-menu-button.component';
-
+import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 
 @Component({
   selector: 'app-task-list-page',
@@ -27,28 +34,108 @@ import { UserMenuComponent } from '../../shared/components/user-menu-button/user
     MatDividerModule,
     MatSelectModule,
     LogoutButtonComponent,
-    PersonalInfoDialogComponent
+    PersonalInfoDialogComponent,
+    MatPaginatorModule,
+    MatFormFieldModule,
+    MatInputModule,
+    FormsModule,
+    MatDatepickerModule,
+    ReactiveFormsModule,
+  ],
+  providers: [
+    { provide: DateAdapter, useClass: MomentDateAdapter, deps: [MAT_DATE_LOCALE, MAT_MOMENT_DATE_ADAPTER_OPTIONS] },
+    { provide: MAT_DATE_LOCALE, useValue: 'es-ES' },
+    { provide: MAT_DATE_FORMATS, useValue: MAT_MOMENT_DATE_FORMATS }
   ],
   templateUrl: './task-list-page.component.html',
   styleUrls: ['./task-list-page.component.scss'],
 })
-export class TaskListPageComponent {
+export class TaskListPageComponent implements OnInit {
   tasks: Task[] = [];
+  filtersForm: FormGroup;
   displayedColumns: string[] = ['title', 'createdAt', 'status', 'options'];
   statuses: string[] = Object.values(TaskStatus);
+  totalTasks = 0;
+  pageSize = 50;
+  page = 1;
+  filters = {
+    status: '',
+    search: '',
+    dateRange: null as { startDate: Date | null; endDate: Date | null } | null
+  };
 
   constructor(
     private taskService: TaskService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private fb: FormBuilder
   ) {
+    this.filtersForm = this.fb.group({
+      status: [''],
+      search: [''],
+      dateRange: this.fb.group({
+        startDate: [null],
+        endDate: [null],
+      }),
+    });
+  }
+
+  ngOnInit(): void {
     this.fetchTasks();
   }
 
   fetchTasks(): void {
-    this.taskService.getTasks().subscribe({
-      next: (tasks) => (this.tasks = tasks),
+    const formValues = this.filtersForm.value;
+
+    const startDate = formValues.dateRange?.startDate
+      ? this.toUtcStartOfDay(new Date(formValues.dateRange.startDate))
+      : null;
+
+    const endDate = formValues.dateRange?.endDate
+      ? this.toUtcEndOfDay(new Date(formValues.dateRange.endDate))
+      : null;
+
+    const params = {
+      status: formValues.status,
+      search: formValues.search,
+      startDate: startDate ? startDate.toISOString() : null,
+      endDate: endDate ? endDate.toISOString() : null,
+      page: this.page,
+      pageSize: this.pageSize,
+    };
+
+    this.taskService.getTasks(params).subscribe({
+      next: (response) => {
+        this.tasks = response.tasks;
+        this.totalTasks = response.total;
+      },
       error: (err) => console.error('Error fetching tasks:', err),
     });
+  }
+
+  private toUtcStartOfDay(date: Date): Date {
+    return new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0));
+  }
+
+  private toUtcEndOfDay(date: Date): Date {
+    return new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999));
+  }
+
+  applyFilters(): void {
+    this.page = 1;
+    this.fetchTasks();
+  }
+
+  clearFilters(): void {
+    this.filtersForm.reset();
+    this.filtersForm.get('status')?.setValue('');
+    this.page = 1;
+    this.fetchTasks();
+  }
+
+  onPageChange(event: PageEvent): void {
+    this.page = event.pageIndex + 1;
+    this.pageSize = event.pageSize;
+    this.fetchTasks();
   }
 
   toggleTaskStatus(task: Task): void {
