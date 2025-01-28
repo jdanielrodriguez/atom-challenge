@@ -17,6 +17,15 @@
       <input matInput formControlName="search" placeholder="Buscar tareas..." />
     </mat-form-field>
 
+    <mat-form-field appearance="outline" class="date-range-picker" formGroupName="dateRange">
+      <mat-label>Rango de fechas</mat-label>
+      <mat-date-range-input [rangePicker]="datePicker">
+        <input matStartDate formControlName="startDate" placeholder="Fecha inicial" />
+        <input matEndDate formControlName="endDate" placeholder="Fecha final" />
+      </mat-date-range-input>
+      <mat-datepicker-toggle matSuffix [for]="datePicker"></mat-datepicker-toggle>
+      <mat-date-range-picker #datePicker></mat-date-range-picker>
+    </mat-form-field>
 
     <div class="filter-buttons">
       <button mat-raised-button color="primary" (click)="applyFilters()">
@@ -82,6 +91,6 @@
   </button>
 
   <button mat-button class="created-by-button" (click)="openPersonalInfoDialog()">
-    Creado por <mat-icon>person</mat-icon>
+    Autor <mat-icon>person</mat-icon>
   </button>
 </div>
