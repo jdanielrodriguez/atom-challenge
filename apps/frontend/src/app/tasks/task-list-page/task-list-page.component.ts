@@ -167,10 +167,12 @@ export class TaskListPageComponent implements OnInit {
 
   deleteTask(task: Task): void {
     this.openDialog(ConfirmDialogComponent, {
-      title: 'Eliminar tarea',
-      message: `¿Estás seguro de que deseas eliminar la tarea "${task.title}"?`,
-      confirmText: 'Eliminar',
-      cancelText: 'Cancelar',
+      data: {
+        title: 'Eliminar tarea',
+        message: `¿Estás seguro de que deseas eliminar la tarea "${task.title}"?`,
+        confirmText: 'Eliminar',
+        cancelText: 'Cancelar',
+      }
     }).afterClosed().subscribe((confirmed) => {
       if (confirmed && task.id) {
         this.taskService.deleteTask(task.id).subscribe(() => this.fetchTasks());
