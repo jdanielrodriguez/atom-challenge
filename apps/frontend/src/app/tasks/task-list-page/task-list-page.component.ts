@@ -156,28 +156,51 @@ export class TaskListPageComponent implements OnInit {
     return this.statuses.filter((status) => status !== currentStatus);
   }
 
-  addTask(): void {
-    this.openDialog(TaskDetailPageComponent, { height: '60%' }).afterClosed().subscribe(() => this.fetchTasks());
+  async addTask(): Promise<void> {
+    const dialogRef = this.openDialog(TaskDetailPageComponent, {
+      height: '60%',
+      data: {
+        beforeClose: async () => {
+          await this.fetchTasks();
+        },
+      },
+    });
+
+    await lastValueFrom(dialogRef.afterClosed());
   }
 
-  editTask(task: Task): void {
-    this.openDialog(TaskDetailPageComponent, { height: '65%', data: { task, readonly: true } })
-      .afterClosed().subscribe(() => this.fetchTasks());
+  async editTask(task: Task): Promise<void> {
+    const dialogRef = this.openDialog(TaskDetailPageComponent, {
+      height: '65%',
+      data: {
+        task,
+        readonly: true,
+        beforeClose: async () => {
+          await this.fetchTasks();
+        },
+      },
+    });
+
+    await lastValueFrom(dialogRef.afterClosed());
   }
 
-  deleteTask(task: Task): void {
-    this.openDialog(ConfirmDialogComponent, {
+  async deleteTask(task: Task): Promise<void> {
+    const dialogRef = this.openDialog(ConfirmDialogComponent, {
       data: {
         title: 'Eliminar tarea',
         message: `¿Estás seguro de que deseas eliminar la tarea "${task.title}"?`,
         confirmText: 'Eliminar',
         cancelText: 'Cancelar',
-      }
-    }).afterClosed().subscribe((confirmed) => {
-      if (confirmed && task.id) {
-        this.taskService.deleteTask(task.id).subscribe(() => this.fetchTasks());
-      }
+        beforeClose: async () => {
+          if (task.id) {
+            await lastValueFrom(this.taskService.deleteTask(task.id));
+            await this.fetchTasks();
+          }
+        },
+      },
     });
+
+    await lastValueFrom(dialogRef.afterClosed());
   }
 
   openPersonalInfoDialog(): void {

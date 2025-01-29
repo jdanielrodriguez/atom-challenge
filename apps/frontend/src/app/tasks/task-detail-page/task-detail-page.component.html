@@ -1,4 +1,7 @@
 <div class="task-detail-container">
+  <div class="loading-overlay" *ngIf="isLoading">
+    <mat-spinner diameter="50"></mat-spinner>
+  </div>
   <h1>{{ isEditMode ? 'Editar Tarea' : 'Nueva Tarea' }}</h1>
   <app-task-form [task]="task" [statuses]="statuses" [readonly]="isReadonly" [isLoading]="isLoading"
     (save)="onSave($event)" (cancel)="onCancel()"></app-task-form>

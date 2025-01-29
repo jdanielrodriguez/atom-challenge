@@ -1,15 +1,18 @@
 import { Component, Inject, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { TaskService } from '../../core/services/task.service';
-import { Task, TaskStatus } from '../../interfaces/task.interface';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { TaskFormComponent } from '../task-form/task-form.component';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { lastValueFrom } from 'rxjs';
+import { Task, TaskStatus } from '../../interfaces/task.interface';
+import { TaskService } from '../../core/services/task.service';
+import { TaskFormComponent } from '../task-form/task-form.component';
 
 @Component({
   selector: 'app-task-detail-page',
   standalone: true,
-  imports: [TaskFormComponent],
+  imports: [TaskFormComponent, MatProgressSpinnerModule, CommonModule],
   templateUrl: './task-detail-page.component.html',
   styleUrls: ['./task-detail-page.component.scss'],
 })
@@ -24,15 +27,15 @@ export class TaskDetailPageComponent implements OnInit {
     private taskService: TaskService,
     private snackBar: MatSnackBar,
     private dialogRef: MatDialogRef<TaskDetailPageComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { task: Task | null; readonly: boolean },
+    @Inject(MAT_DIALOG_DATA) public data: { task: Task | null; readonly: boolean; beforeClose?: () => Promise<void> },
     private breakpointObserver: BreakpointObserver
-
   ) { }
 
   ngOnInit(): void {
     this.isReadonly = this.data?.readonly || false;
     this.task = this.data?.task || null;
     this.isEditMode = !!this.task?.id;
+
     this.breakpointObserver.observe([Breakpoints.Handset]).subscribe((result) => {
       if (result.matches) {
         this.adjustForMobile('80%', '75%');
@@ -46,40 +49,28 @@ export class TaskDetailPageComponent implements OnInit {
     this.dialogRef.updateSize(width, height);
   }
 
-  onSave(task: Task): void {
+  async onSave(task: Task): Promise<void> {
     this.isLoading = true;
 
-    if (task.id) {
-      this.updateTask(task);
-    } else {
-      this.createTask(task);
-    }
-  }
-
-  private createTask(task: Task): void {
-    this.taskService.addTask(task).subscribe({
-      next: (newTask) => {
-        this.snackBar.open('Tarea creada correctamente', 'Cerrar', { duration: 3000 });
-        this.dialogRef.close(newTask);
-      },
-      error: () => {
-        this.snackBar.open('Error creando la tarea', 'Cerrar', { duration: 3000 });
-      },
-      complete: () => (this.isLoading = false),
-    });
-  }
-
-  private updateTask(task: Task): void {
-    this.taskService.updateTask(task).subscribe({
-      next: () => {
+    try {
+      if (task.id) {
+        await lastValueFrom(this.taskService.updateTask(task));
         this.snackBar.open('Tarea actualizada correctamente', 'Cerrar', { duration: 3000 });
-        this.dialogRef.close(task);
-      },
-      error: () => {
-        this.snackBar.open('Error actualizando la tarea', 'Cerrar', { duration: 3000 });
-      },
-      complete: () => (this.isLoading = false),
-    });
+      } else {
+        const newTask = await lastValueFrom(this.taskService.addTask(task));
+        this.snackBar.open('Tarea creada correctamente', 'Cerrar', { duration: 3000 });
+      }
+
+      if (this.data.beforeClose) {
+        await this.data.beforeClose();
+      }
+
+      this.dialogRef.close(task);
+    } catch (error) {
+      this.snackBar.open('Error al guardar la tarea', 'Cerrar', { duration: 3000 });
+    } finally {
+      this.isLoading = false;
+    }
   }
 
   onCancel(): void {
