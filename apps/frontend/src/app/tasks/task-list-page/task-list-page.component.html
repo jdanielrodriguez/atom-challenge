@@ -80,8 +80,25 @@
         </td>
       </ng-container>
 
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      <ng-container matColumnDef="loading">
+        <th mat-header-cell *matHeaderCellDef>Cargando</th>
+        <td mat-cell *matCellDef="let task">
+          <div class="loading-container">
+            <mat-spinner diameter="40"></mat-spinner>
+            <p>Cargando tareas...</p>
+          </div>
+        </td>
+      </ng-container>
+      <tr mat-header-row [hidden]="isLoading" *matHeaderRowDef="displayedColumns"></tr>
+
+      <ng-container *ngIf="isLoading">
+        <tr mat-row *matRowDef="let row; columns: ['loading'];" class="loading-row"></tr>
+      </ng-container>
+
+      <ng-container *ngIf="!isLoading">
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </ng-container>
+
     </table>
   </div>
 

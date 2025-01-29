@@ -8,11 +8,12 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSelectModule } from '@angular/material/select';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { provideMatPaginatorIntl } from '../../shared/providers/custom-paginator-intl.component';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { CommonModule } from '@angular/common';
+import { provideMatPaginatorIntl } from '../../shared/providers/custom-paginator-intl.component';
 import { TaskService } from '../../core/services/task.service';
 import { Task, TaskStatus } from '../../interfaces/task.interface';
 import { TaskDetailPageComponent } from '../task-detail-page/task-detail-page.component';
@@ -42,6 +43,7 @@ import { lastValueFrom } from 'rxjs';
     FormsModule,
     MatDatepickerModule,
     ReactiveFormsModule,
+    MatProgressSpinnerModule
   ],
   providers: [
     { provide: DateAdapter, useClass: MomentDateAdapter, deps: [MAT_DATE_LOCALE, MAT_MOMENT_DATE_ADAPTER_OPTIONS] },
@@ -53,13 +55,14 @@ import { lastValueFrom } from 'rxjs';
   styleUrls: ['./task-list-page.component.scss'],
 })
 export class TaskListPageComponent implements OnInit {
-  tasks: Task[] = [];
+  tasks: Task[] = [this.cleanTable()];
   filtersForm: FormGroup;
   displayedColumns: string[] = ['title', 'createdAt', 'status', 'options'];
   statuses = Object.values(TaskStatus);
   totalTasks = 0;
   pageSize = 50;
   page = 1;
+  isLoading = false;
 
   constructor(
     private taskService: TaskService,
@@ -78,20 +81,25 @@ export class TaskListPageComponent implements OnInit {
   }
 
   async fetchTasks(): Promise<void> {
+    this.isLoading = true;
+    this.tasks = [this.cleanTable()];
     try {
-      const response = await lastValueFrom(
-        this.taskService.getTasks({
-          status: this.filtersForm.value.status,
-          search: this.filtersForm.value.search,
-          ...this.formatDateRange(this.filtersForm.value.dateRange),
-          page: this.page,
-          pageSize: this.pageSize,
-        })
-      );
+      const { status, search, dateRange } = this.filtersForm.value;
+      const params = {
+        status,
+        search,
+        ...this.formatDateRange(dateRange),
+        page: this.page,
+        pageSize: this.pageSize,
+      };
+
+      const response = await lastValueFrom(this.taskService.getTasks(params));
       this.tasks = response.tasks;
       this.totalTasks = response.total;
     } catch (err) {
       console.error('Error fetching tasks:', err);
+    } finally {
+      this.isLoading = false;
     }
   }
 
@@ -157,31 +165,11 @@ export class TaskListPageComponent implements OnInit {
   }
 
   async addTask(): Promise<void> {
-    const dialogRef = this.openDialog(TaskDetailPageComponent, {
-      height: '60%',
-      data: {
-        beforeClose: async () => {
-          await this.fetchTasks();
-        },
-      },
-    });
-
-    await lastValueFrom(dialogRef.afterClosed());
+    await this.openDialogWithFetch(TaskDetailPageComponent, { height: '60%' });
   }
 
   async editTask(task: Task): Promise<void> {
-    const dialogRef = this.openDialog(TaskDetailPageComponent, {
-      height: '65%',
-      data: {
-        task,
-        readonly: true,
-        beforeClose: async () => {
-          await this.fetchTasks();
-        },
-      },
-    });
-
-    await lastValueFrom(dialogRef.afterClosed());
+    await this.openDialogWithFetch(TaskDetailPageComponent, { height: '65%', data: { task, readonly: true } });
   }
 
   async deleteTask(task: Task): Promise<void> {
@@ -203,11 +191,21 @@ export class TaskListPageComponent implements OnInit {
     await lastValueFrom(dialogRef.afterClosed());
   }
 
+  async openDialogWithFetch(component: any, config: any = {}) {
+    const dialogRef = this.dialog.open(component, config);
+    await lastValueFrom(dialogRef.afterClosed());
+    await this.fetchTasks();
+  }
+
   openPersonalInfoDialog(): void {
     this.openDialog(PersonalInfoDialogComponent);
   }
 
   private openDialog(component: any, config: any = {}) {
     return this.dialog.open(component, config);
+  }
+
+  cleanTable() {
+    return { title: 'loading', description: 'loading', status: TaskStatus.Creado, createdAt: new Date(), completed: false }
   }
 }
