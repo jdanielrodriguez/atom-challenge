@@ -192,7 +192,7 @@ export class TaskListPageComponent implements OnInit {
   }
 
   async openDialogWithFetch(component: any, config: any = {}) {
-    const dialogRef = this.dialog.open(component, config);
+    const dialogRef = this.openDialog(component, config);
     await lastValueFrom(dialogRef.afterClosed());
     await this.fetchTasks();
   }

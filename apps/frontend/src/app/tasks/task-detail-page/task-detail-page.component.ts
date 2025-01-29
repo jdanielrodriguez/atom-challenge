@@ -61,7 +61,7 @@ export class TaskDetailPageComponent implements OnInit {
         this.snackBar.open('Tarea creada correctamente', 'Cerrar', { duration: 3000 });
       }
 
-      if (this.data.beforeClose) {
+      if (this.data?.beforeClose) {
         await this.data.beforeClose();
       }
 
