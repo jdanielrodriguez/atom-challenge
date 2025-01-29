@@ -10,6 +10,21 @@
   justify-content: center;
   align-items: center;
   gap: 16px;
+  position: relative;
+}
+
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+  border-radius: 12px;
 }
 
 .close-button {
@@ -97,4 +112,9 @@ button[color="primary"] {
   &:hover {
     background-color: #303f9f;
   }
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }

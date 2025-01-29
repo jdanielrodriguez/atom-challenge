@@ -8,10 +8,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSelectModule } from '@angular/material/select';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { provideMatPaginatorIntl } from '../../shared/providers/custom-paginator-intl.component';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { TaskService } from '../../core/services/task.service';
 import { Task, TaskStatus } from '../../interfaces/task.interface';
@@ -20,7 +20,8 @@ import { ConfirmDialogComponent, DEFAULT_DIALOG_CONFIG } from '../../shared/comp
 import { PersonalInfoDialogComponent } from '../../shared/components/personal-info-dialog/personal-info-dialog.component';
 import { LogoutButtonComponent } from '../../shared/components/logout-button/logout-button.component';
 import { UserMenuComponent } from '../../shared/components/user-menu-button/user-menu-button.component';
-import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, FormsModule } from '@angular/forms';
+import { lastValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-task-list-page',
@@ -45,7 +46,8 @@ import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
   providers: [
     { provide: DateAdapter, useClass: MomentDateAdapter, deps: [MAT_DATE_LOCALE, MAT_MOMENT_DATE_ADAPTER_OPTIONS] },
     { provide: MAT_DATE_LOCALE, useValue: 'es-ES' },
-    { provide: MAT_DATE_FORMATS, useValue: MAT_MOMENT_DATE_FORMATS }
+    { provide: MAT_DATE_FORMATS, useValue: MAT_MOMENT_DATE_FORMATS },
+    provideMatPaginatorIntl
   ],
   templateUrl: './task-list-page.component.html',
   styleUrls: ['./task-list-page.component.scss'],
@@ -54,15 +56,10 @@ export class TaskListPageComponent implements OnInit {
   tasks: Task[] = [];
   filtersForm: FormGroup;
   displayedColumns: string[] = ['title', 'createdAt', 'status', 'options'];
-  statuses: string[] = Object.values(TaskStatus);
+  statuses = Object.values(TaskStatus);
   totalTasks = 0;
   pageSize = 50;
   page = 1;
-  filters = {
-    status: '',
-    search: '',
-    dateRange: null as { startDate: Date | null; endDate: Date | null } | null
-  };
 
   constructor(
     private taskService: TaskService,
@@ -72,10 +69,7 @@ export class TaskListPageComponent implements OnInit {
     this.filtersForm = this.fb.group({
       status: [''],
       search: [''],
-      dateRange: this.fb.group({
-        startDate: [null],
-        endDate: [null],
-      }),
+      dateRange: this.fb.group({ startDate: [null], endDate: [null] }),
     });
   }
 
@@ -83,40 +77,38 @@ export class TaskListPageComponent implements OnInit {
     this.fetchTasks();
   }
 
-  fetchTasks(): void {
-    const formValues = this.filtersForm.value;
-
-    const startDate = formValues.dateRange?.startDate
-      ? this.toUtcStartOfDay(new Date(formValues.dateRange.startDate))
-      : null;
-
-    const endDate = formValues.dateRange?.endDate
-      ? this.toUtcEndOfDay(new Date(formValues.dateRange.endDate))
-      : null;
-
-    const params = {
-      status: formValues.status,
-      search: formValues.search,
-      startDate: startDate ? startDate.toISOString() : null,
-      endDate: endDate ? endDate.toISOString() : null,
-      page: this.page,
-      pageSize: this.pageSize,
-    };
-
-    this.taskService.getTasks(params).subscribe({
-      next: (response) => {
-        this.tasks = response.tasks;
-        this.totalTasks = response.total;
-      },
-      error: (err) => console.error('Error fetching tasks:', err),
-    });
+  async fetchTasks(): Promise<void> {
+    try {
+      const response = await lastValueFrom(
+        this.taskService.getTasks({
+          status: this.filtersForm.value.status,
+          search: this.filtersForm.value.search,
+          ...this.formatDateRange(this.filtersForm.value.dateRange),
+          page: this.page,
+          pageSize: this.pageSize,
+        })
+      );
+      this.tasks = response.tasks;
+      this.totalTasks = response.total;
+    } catch (err) {
+      console.error('Error fetching tasks:', err);
+    }
   }
 
-  private toUtcStartOfDay(date: Date): Date {
+  formatDateRange(dateRange: any): { startDate: string | null; endDate: string | null } {
+    if (!dateRange?.startDate || !dateRange?.endDate) return { startDate: null, endDate: null };
+
+    return {
+      startDate: this.toUtcStartOfDay(new Date(dateRange.startDate)).toISOString(),
+      endDate: this.toUtcEndOfDay(new Date(dateRange.endDate)).toISOString(),
+    };
+  }
+
+  toUtcStartOfDay(date: Date): Date {
     return new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0));
   }
 
-  private toUtcEndOfDay(date: Date): Date {
+  toUtcEndOfDay(date: Date): Date {
     return new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999));
   }
 
@@ -126,8 +118,7 @@ export class TaskListPageComponent implements OnInit {
   }
 
   clearFilters(): void {
-    this.filtersForm.reset();
-    this.filtersForm.get('status')?.setValue('');
+    this.filtersForm.reset({ status: '', search: '', dateRange: { startDate: null, endDate: null } });
     this.page = 1;
     this.fetchTasks();
   }
@@ -140,40 +131,25 @@ export class TaskListPageComponent implements OnInit {
 
   toggleTaskStatus(task: Task): void {
     const updatedTask = { ...task, completed: !task.completed };
-    this.taskService.updateTask(updatedTask).subscribe({
-      next: () => {
-        this.tasks = this.tasks.map((t) => (t.id === task.id ? updatedTask : t));
-      },
-      error: (err) => console.error('Error updating task status:', err),
-    });
+    this.taskService.updateTask(updatedTask).subscribe(() => this.fetchTasks());
   }
 
-  onStatusChange(task: Task, newStatus: string): void {
-    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-      ...DEFAULT_DIALOG_CONFIG,
-      ...{
-        data: {
-          title: 'Cambiar Estado',
-          message: `¿Seguro que deseas cambiar el estado de "${task.title}" de "${task.status}" a "${newStatus}"?`,
-          confirmText: 'Confirmar',
-          cancelText: 'Cancelar',
+  async onStatusChange(task: Task, newStatus: TaskStatus): Promise<void> {
+    const dialogRef = this.openDialog(ConfirmDialogComponent, {
+      data: {
+        title: 'Cambiar Estado',
+        message: `¿Seguro que deseas cambiar el estado de "${task.title}" de "${task.status}" a "${newStatus}"?`,
+        confirmText: 'Confirmar',
+        cancelText: 'Cancelar',
+        beforeClose: async () => {
+          task.completed = newStatus === TaskStatus.Completado;
+          await lastValueFrom(this.taskService.updateTask({ ...task, status: newStatus }));
+          await this.fetchTasks();
         },
-      }
+      },
     });
 
-    dialogRef.afterClosed().subscribe((confirmed) => {
-      if (confirmed) {
-        task.completed = false;
-        if (newStatus === 'Completado') {
-          task.completed = true;
-        }
-        task.status = Object.values(TaskStatus).includes(newStatus as TaskStatus) ? (newStatus as TaskStatus) : TaskStatus.Creado;
-        this.taskService.updateTask(task).subscribe({
-          next: () => console.log('Estado actualizado'),
-          error: (err) => console.error('Error actualizando el estado', err),
-        });
-      }
-    });
+    await lastValueFrom(dialogRef.afterClosed());
   }
 
   getFilteredStatuses(currentStatus: string): string[] {
@@ -181,62 +157,32 @@ export class TaskListPageComponent implements OnInit {
   }
 
   addTask(): void {
-    const dialogRef = this.dialog.open(TaskDetailPageComponent, {
-      ...DEFAULT_DIALOG_CONFIG,
-      ...{
-        height: '60%',
-      }
-    });
-
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        this.fetchTasks();
-      }
-    });
+    this.openDialog(TaskDetailPageComponent, { height: '60%' }).afterClosed().subscribe(() => this.fetchTasks());
   }
 
   editTask(task: Task): void {
-    const dialogRef = this.dialog.open(TaskDetailPageComponent, {
-      ...DEFAULT_DIALOG_CONFIG,
-      ...{
-        height: '65%',
-        data: { task, readonly: true }
-      },
-    });
-
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        this.fetchTasks();
-      }
-    });
+    this.openDialog(TaskDetailPageComponent, { height: '65%', data: { task, readonly: true } })
+      .afterClosed().subscribe(() => this.fetchTasks());
   }
 
-  deleteTask(task: any): void {
-    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-      ...DEFAULT_DIALOG_CONFIG,
-      ...{
-        data: {
-          title: 'Eliminar tarea',
-          message: `¿Estás seguro de que deseas eliminar la tarea "${task.title}"?`,
-          confirmText: 'Eliminar',
-          cancelText: 'Cancelar',
-        },
-      }
-    });
-
-    dialogRef.afterClosed().subscribe((confirmed) => {
-      if (confirmed) {
-        this.taskService.deleteTask(task.id).subscribe({
-          next: () => { this.fetchTasks(); dialogRef.close(); },
-          error: (err) => console.error('Error al eliminar la tarea:', err),
-        });
+  deleteTask(task: Task): void {
+    this.openDialog(ConfirmDialogComponent, {
+      title: 'Eliminar tarea',
+      message: `¿Estás seguro de que deseas eliminar la tarea "${task.title}"?`,
+      confirmText: 'Eliminar',
+      cancelText: 'Cancelar',
+    }).afterClosed().subscribe((confirmed) => {
+      if (confirmed && task.id) {
+        this.taskService.deleteTask(task.id).subscribe(() => this.fetchTasks());
       }
     });
   }
 
   openPersonalInfoDialog(): void {
-    this.dialog.open(PersonalInfoDialogComponent, {
-      ...DEFAULT_DIALOG_CONFIG,
-    });
+    this.openDialog(PersonalInfoDialogComponent);
+  }
+
+  private openDialog(component: any, config: any = {}) {
+    return this.dialog.open(component, config);
   }
 }

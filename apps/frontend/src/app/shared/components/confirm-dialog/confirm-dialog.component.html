@@ -1,19 +1,27 @@
 <div class="dialog-wrapper">
-  <button mat-icon-button class="close-button" (click)="onCancel()">
+  <!-- Pantalla de carga que cubre toda la modal -->
+  <div class="loading-overlay" *ngIf="isLoading">
+    <mat-spinner diameter="50"></mat-spinner>
+  </div>
+
+  <button mat-icon-button class="close-button" (click)="onCancel()" [disabled]="isLoading">
     <mat-icon>close</mat-icon>
   </button>
+
   <div class="dialog-header">
     <h2>{{ data.title }}</h2>
   </div>
+
   <div mat-dialog-content class="dialog-content">
     <p>{{ data.message }}</p>
   </div>
+
   <div mat-dialog-actions class="dialog-actions">
-    <button mat-raised-button color="warn" *ngIf="data.cancelText" (click)="onCancel()">
+    <button mat-raised-button color="warn" *ngIf="data.cancelText" (click)="onCancel()" [disabled]="isLoading">
       {{ data.cancelText || 'Cancelar' }}
     </button>
-    <button mat-raised-button color="primary" (click)="onConfirm()">
-      {{ data.confirmText || 'Aceptar' }}
+    <button mat-raised-button color="primary" (click)="onConfirm()" [disabled]="isLoading">
+      {{ isLoading ? 'Procesando...' : (data.confirmText || 'Aceptar') }}
     </button>
   </div>
 </div>

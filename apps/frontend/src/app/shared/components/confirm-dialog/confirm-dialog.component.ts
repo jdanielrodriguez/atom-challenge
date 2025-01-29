@@ -2,6 +2,7 @@ import { NgIf } from '@angular/common';
 import { Component, Inject, OnInit } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogConfig } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 
 export const DEFAULT_DIALOG_CONFIG: MatDialogConfig = {
@@ -16,12 +17,20 @@ export const DEFAULT_DIALOG_CONFIG: MatDialogConfig = {
   templateUrl: './confirm-dialog.component.html',
   styleUrls: ['./confirm-dialog.component.scss'],
   standalone: true,
-  imports: [MatIconModule, NgIf],
+  imports: [MatIconModule, NgIf, MatProgressSpinnerModule],
 })
 export class ConfirmDialogComponent implements OnInit {
+  isLoading = false;
+
   constructor(
     public dialogRef: MatDialogRef<ConfirmDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { title: string; message: string; confirmText: string; cancelText?: string },
+    @Inject(MAT_DIALOG_DATA) public data: {
+      title: string;
+      message: string;
+      confirmText: string;
+      cancelText?: string;
+      beforeClose?: () => Promise<void>;
+    },
     private breakpointObserver: BreakpointObserver
   ) { }
 
@@ -39,8 +48,18 @@ export class ConfirmDialogComponent implements OnInit {
     this.dialogRef.updateSize(width, height);
   }
 
-  onConfirm(): void {
-    this.dialogRef.close(true);
+  async onConfirm(): Promise<void> {
+    if (this.data.beforeClose) {
+      this.isLoading = true;
+      try {
+        await this.data.beforeClose();
+      } finally {
+        this.isLoading = false;
+        this.dialogRef.close(true);
+      }
+    } else {
+      this.dialogRef.close(true);
+    }
   }
 
   onCancel(): void {
