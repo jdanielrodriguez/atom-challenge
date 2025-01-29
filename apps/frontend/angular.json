@@ -26,6 +26,14 @@
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "allowedCommonJsDependencies": [
+              "moment",
+              "@firebase/util",
+              "@firebase/component",
+              "@firebase/app",
+              "@firebase/auth",
+              "@firebase/firestore",
+              "@firebase/functions",
+              "tslib",
               "node-forge"
             ],
             "assets": [
