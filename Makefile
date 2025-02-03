@@ -34,3 +34,6 @@ build-dev:
 
 build-prod:
 	docker-compose -f infra/docker-compose.prod.yml up --build
+
+build-env:
+	docker exec -it atom_challenge_frontend node src/generate-env.ts
